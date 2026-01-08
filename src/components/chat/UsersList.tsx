@@ -13,7 +13,12 @@ interface UsersListProps {
 }
 
 function getInitials(name: string): string {
-  return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function getAvatarColor(name: string): string {
@@ -21,22 +26,30 @@ function getAvatarColor(name: string): string {
   return colors[name.charCodeAt(0) % colors.length];
 }
 
-export function UsersList({ users, existingConversationUserIds, onStartChat, translate }: UsersListProps) {
+export function UsersList({
+  users,
+  existingConversationUserIds,
+  onStartChat,
+  translate,
+}: UsersListProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredUsers = users.filter(user => 
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredUsers = users.filter(
+    (user) =>
+      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const availableUsers = filteredUsers.filter(u => !existingConversationUserIds.includes(u.id));
-  const existingUsers = filteredUsers.filter(u => existingConversationUserIds.includes(u.id));
+  const availableUsers = filteredUsers.filter((u) => !existingConversationUserIds.includes(u.id));
+  const existingUsers = filteredUsers.filter((u) => existingConversationUserIds.includes(u.id));
 
   return (
     <div className="flex flex-col h-full bg-sidebar">
       <div className="flex items-center gap-2 border-b border-sidebar-border p-4">
         <Users className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold text-sidebar-foreground">{translate('users.available')}</h2>
+        <h2 className="text-lg font-semibold text-sidebar-foreground">
+          {translate('users.available')}
+        </h2>
       </div>
 
       {/* Search */}
@@ -52,7 +65,7 @@ export function UsersList({ users, existingConversationUserIds, onStartChat, tra
           />
         </div>
       </div>
-      
+
       <div className="flex-1 overflow-y-auto">
         {filteredUsers.length === 0 ? (
           <div className="flex h-full items-center justify-center p-8">
@@ -80,16 +93,18 @@ export function UsersList({ users, existingConversationUserIds, onStartChat, tra
                 className="flex items-center gap-3 p-4 border-b border-sidebar-border hover:bg-secondary/50 transition-colors"
               >
                 <div className="relative">
-                  <div className={cn(
-                    'flex h-12 w-12 items-center justify-center rounded-full text-sm font-semibold text-white',
-                    getAvatarColor(user.name)
-                  )}>
+                  <div
+                    className={cn(
+                      'flex h-12 w-12 items-center justify-center rounded-full text-sm font-semibold text-white',
+                      getAvatarColor(user.name),
+                    )}
+                  >
                     {getInitials(user.name)}
                   </div>
                   <div
                     className={cn(
                       'absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-sidebar',
-                      user.isOnline ? 'bg-green-500' : 'bg-muted'
+                      user.isOnline ? 'bg-green-500' : 'bg-muted',
                     )}
                   />
                 </div>
@@ -125,10 +140,12 @@ export function UsersList({ users, existingConversationUserIds, onStartChat, tra
                     onClick={() => onStartChat(user)}
                   >
                     <div className="relative">
-                      <div className={cn(
-                        'flex h-12 w-12 items-center justify-center rounded-full text-sm font-semibold text-white',
-                        getAvatarColor(user.name)
-                      )}>
+                      <div
+                        className={cn(
+                          'flex h-12 w-12 items-center justify-center rounded-full text-sm font-semibold text-white',
+                          getAvatarColor(user.name),
+                        )}
+                      >
                         {getInitials(user.name)}
                       </div>
                     </div>

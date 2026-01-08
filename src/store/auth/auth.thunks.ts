@@ -1,14 +1,8 @@
-
-import { AppDispatch } from "../index";
-import {
-  authStart,
-  authSuccess,
-  authFailure,
-  logoutSuccess,
-} from "./auth.slice";
-import { connectSocket, disconnectSocket } from "@/socket/socket";
-import type { AuthUser } from "./auth.slice";
-import api from "@/utils/axiosInstance";
+import { AppDispatch } from '../index';
+import { authStart, authSuccess, authFailure, logoutSuccess } from './auth.slice';
+import { connectSocket, disconnectSocket } from '@/socket/socket';
+import type { AuthUser } from './auth.slice';
+import api from '@/utils/axiosInstance';
 
 /* =========================
    CHECK AUTH (REFRESH)
@@ -18,10 +12,10 @@ export const checkAuth = () => async (dispatch: AppDispatch) => {
   dispatch(authStart());
 
   try {
-    const { data } = await api.get("/api/auth/me");
+    const { data } = await api.get('/api/auth/me');
 
     const normalizedUser = {
-      id: data._id,          
+      id: data._id,
       username: data.username,
       email: data.email,
       avatar: data.avatar,
@@ -34,41 +28,37 @@ export const checkAuth = () => async (dispatch: AppDispatch) => {
   }
 };
 
-
 /* =========================
    LOGIN
 ========================= */
 
-export const loginUser =
-  (email: string, password: string) =>
-  async (dispatch: AppDispatch) => {
-    dispatch(authStart());
+export const loginUser = (email: string, password: string) => async (dispatch: AppDispatch) => {
+  dispatch(authStart());
 
-    try {
-      const { data } = await api.post<AuthUser>("/api/auth/login", {
-        email,
-        password,
-      });
+  try {
+    const { data } = await api.post<AuthUser>('/api/auth/login', {
+      email,
+      password,
+    });
 
-      dispatch(authSuccess(data));
-      connectSocket();
-    } catch (err: any) {
-      dispatch(authFailure(err?.response?.data?.message));
-      throw err;
-    }
-  };
+    dispatch(authSuccess(data));
+    connectSocket();
+  } catch (err: any) {
+    dispatch(authFailure(err?.response?.data?.message));
+    throw err;
+  }
+};
 
 /* =========================
    REGISTER
 ========================= */
 
 export const registerUser =
-  (name: string, email: string, password: string) =>
-  async (dispatch: AppDispatch) => {
+  (name: string, email: string, password: string) => async (dispatch: AppDispatch) => {
     dispatch(authStart());
 
     try {
-      const { data } = await api.post<AuthUser>("/api/auth/register", {
+      const { data } = await api.post<AuthUser>('/api/auth/register', {
         name,
         email,
         password,
@@ -88,7 +78,7 @@ export const registerUser =
 
 export const logout = () => async (dispatch: AppDispatch) => {
   try {
-    await api.post("/api/logout");
+    await api.post('/api/logout');
   } finally {
     disconnectSocket();
     dispatch(logoutSuccess());

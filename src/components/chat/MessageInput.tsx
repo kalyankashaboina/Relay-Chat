@@ -1,29 +1,21 @@
-import { useEffect, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
-import { Send, Mic, X } from "lucide-react";
-import { toast } from "sonner";
+import { useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
+import { Send, Mic, X } from 'lucide-react';
+import { toast } from 'sonner';
 
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { messageAdded } from "@/store/chat/messages.slice";
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { messageAdded } from '@/store/chat/messages.slice';
 
-import {
-  emitSendMessage,
-  emitTypingStart,
-  emitTypingStop,
-} from "@/socket/emitters";
+import { emitSendMessage, emitTypingStart, emitTypingStop } from '@/socket/emitters';
 
 export function MessageInput() {
   const dispatch = useAppDispatch();
 
-  const activeConversationId = useAppSelector(
-    (s) => s.ui.activeConversationId
-  );
+  const activeConversationId = useAppSelector((s) => s.ui.activeConversationId);
 
-  const currentUserId = useAppSelector(
-    (s) => s.auth.user?.id
-  );
+  const currentUserId = useAppSelector((s) => s.auth.user?.id);
 
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const typingRef = useRef(false);
 
@@ -34,14 +26,14 @@ export function MessageInput() {
   const startTyping = () => {
     if (!activeConversationId || typingRef.current) return;
     typingRef.current = true;
-    console.log("[Typing] start", activeConversationId);
+    console.log('[Typing] start', activeConversationId);
     emitTypingStart(activeConversationId);
   };
 
   const stopTyping = () => {
     if (!activeConversationId || !typingRef.current) return;
     typingRef.current = false;
-    console.log("[Typing] stop", activeConversationId);
+    console.log('[Typing] stop', activeConversationId);
     emitTypingStop(activeConversationId);
   };
 
@@ -56,7 +48,7 @@ export function MessageInput() {
 
     const tempId = `temp-${Date.now()}`;
 
-    console.log("[MessageInput] optimistic add", {
+    console.log('[MessageInput] optimistic add', {
       conversationId: activeConversationId,
       tempId,
       content: message,
@@ -71,8 +63,8 @@ export function MessageInput() {
         senderId: currentUserId,
         content: message,
         createdAt: new Date().toISOString(),
-        status: "pending",
-      })
+        status: 'pending',
+      }),
     );
 
     // 🔥 EMIT TO SERVER
@@ -82,7 +74,7 @@ export function MessageInput() {
       tempId,
     });
 
-    setMessage("");
+    setMessage('');
     stopTyping();
   };
 

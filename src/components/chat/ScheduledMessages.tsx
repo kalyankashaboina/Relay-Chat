@@ -1,11 +1,7 @@
 import { Clock, X, Edit2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScheduledMessage } from '@/types/chat';
 
 export type { ScheduledMessage };
@@ -17,11 +13,11 @@ interface ScheduledMessagesProps {
   translate: (key: string) => string;
 }
 
-export function ScheduledMessages({ 
-  scheduledMessages, 
-  onCancel, 
+export function ScheduledMessages({
+  scheduledMessages,
+  onCancel,
   onEdit,
-  translate 
+  translate,
 }: ScheduledMessagesProps) {
   if (scheduledMessages.length === 0) return null;
 
@@ -59,10 +55,7 @@ export function ScheduledMessages({
                   </p>
                 </div>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={() => onEdit(msg)}
-                    className="p-1.5 rounded-md hover:bg-muted"
-                  >
+                  <button onClick={() => onEdit(msg)} className="p-1.5 rounded-md hover:bg-muted">
                     <Edit2 className="h-3.5 w-3.5 text-muted-foreground" />
                   </button>
                   <button

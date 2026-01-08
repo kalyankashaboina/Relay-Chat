@@ -1,22 +1,16 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
-import {
-  MessageSquare,
-  Mail,
-  Loader2,
-  ArrowLeft,
-  CheckCircle,
-} from "lucide-react";
+import { MessageSquare, Mail, Loader2, ArrowLeft, CheckCircle } from 'lucide-react';
 
-import { toast } from "sonner";
+import { toast } from 'sonner';
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -24,21 +18,21 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
 
     if (!email) {
-      toast.error("Please enter your email");
+      toast.error('Please enter your email');
       return;
     }
 
     setIsLoading(true);
 
     try {
-      console.log("[FORGOT PASSWORD]", email);
+      console.log('[FORGOT PASSWORD]', email);
 
       // TEMPORARY simulated request
       await new Promise((res) => setTimeout(res, 800));
 
       setIsSubmitted(true);
     } catch (err) {
-      toast.error("Failed to send reset email");
+      toast.error('Failed to send reset email');
     } finally {
       setIsLoading(false);
     }
@@ -53,16 +47,12 @@ export default function ForgotPasswordPage() {
           </div>
 
           <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              Reset link sent
-            </h1>
+            <h1 className="text-2xl font-bold text-foreground">Reset link sent</h1>
             <p className="mt-2 text-muted-foreground">
-              If an account exists for this email, you’ll receive a password
-              reset link shortly.
+              If an account exists for this email, you’ll receive a password reset link shortly.
             </p>
             <p className="mt-4 text-sm text-muted-foreground">
-              Sent to:{" "}
-              <span className="font-medium text-foreground">{email}</span>
+              Sent to: <span className="font-medium text-foreground">{email}</span>
             </p>
           </div>
 
@@ -111,19 +101,14 @@ export default function ForgotPasswordPage() {
             </div>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            size="lg"
-            disabled={isLoading}
-          >
+          <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Sending...
               </>
             ) : (
-              "Send reset link"
+              'Send reset link'
             )}
           </Button>
         </form>

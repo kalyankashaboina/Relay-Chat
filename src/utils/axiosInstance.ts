@@ -1,13 +1,13 @@
-import axios from "axios";
-import { store } from "@/store";
-import { logoutSuccess } from "@/store/auth/auth.slice";
-import { disconnectSocket } from "@/socket/socket";
+import axios from 'axios';
+import { store } from '@/store';
+import { logoutSuccess } from '@/store/auth/auth.slice';
+import { disconnectSocket } from '@/socket/socket';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
 });
 
@@ -28,7 +28,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

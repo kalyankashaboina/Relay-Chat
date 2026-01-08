@@ -1,32 +1,22 @@
-import { useState } from "react";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setActiveConversationId } from "@/store/ui/ui.slice";
-import { useTranslate } from "@/hooks/useTranslate";
-import { useGetUsersQuery } from "@/store/users/users.api"
-import {
-  useCreateGroupConversationMutation,
-} from "@/store/chat/conversations.api";
+import { useState } from 'react';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { setActiveConversationId } from '@/store/ui/ui.slice';
+import { useTranslate } from '@/hooks/useTranslate';
+import { useGetUsersQuery } from '@/store/users/users.api';
+import { useCreateGroupConversationMutation } from '@/store/chat/conversations.api';
 
+import { Conversation } from '@/types/chat';
+import { cn } from '@/lib/utils';
 
+import { MessageSquare, Users, Search, Plus, Timer } from 'lucide-react';
 
-import { Conversation } from "@/types/chat";
-import { cn } from "@/lib/utils";
+import { Input } from '@/components/ui/input';
+import { CreateGroupModal } from './CreateGroupModal';
 
-import {
-  MessageSquare,
-  Users,
-  Search,
-  Plus,
-  Timer,
-} from "lucide-react";
+import { format, isToday, isYesterday } from 'date-fns';
+import { motion } from 'framer-motion';
 
-import { Input } from "@/components/ui/input";
-import { CreateGroupModal } from "./CreateGroupModal";
-
-import { format, isToday, isYesterday } from "date-fns";
-import { motion } from "framer-motion";
-
-import { useGetSidebarConversationsQuery } from "@/store/chat/conversations.api";
+import { useGetSidebarConversationsQuery } from '@/store/chat/conversations.api';
 
 /* ---------------------------
    Helpers
@@ -34,29 +24,23 @@ import { useGetSidebarConversationsQuery } from "@/store/chat/conversations.api"
 
 function getInitials(name: string): string {
   return name
-    .split(" ")
+    .split(' ')
     .map((n) => n[0])
-    .join("")
+    .join('')
     .toUpperCase()
     .slice(0, 2);
 }
 
 function getAvatarColor(name: string): string {
-  const colors = [
-    "bg-primary",
-    "bg-green-500",
-    "bg-amber-500",
-    "bg-rose-500",
-    "bg-violet-500",
-  ];
+  const colors = ['bg-primary', 'bg-green-500', 'bg-amber-500', 'bg-rose-500', 'bg-violet-500'];
   return colors[name.charCodeAt(0) % colors.length];
 }
 
 function formatTime(date?: Date): string {
-  if (!date) return "";
-  if (isToday(date)) return format(date, "HH:mm");
-  if (isYesterday(date)) return "Yesterday";
-  return format(date, "MMM d");
+  if (!date) return '';
+  if (isToday(date)) return format(date, 'HH:mm');
+  if (isYesterday(date)) return 'Yesterday';
+  return format(date, 'MMM d');
 }
 
 /* ---------------------------
@@ -90,7 +74,7 @@ interface ConversationItemProps {
   conversation: Conversation;
   isActive: boolean;
   typingUsers: string[];
-   isOnline: boolean;
+  isOnline: boolean;
   onClick: () => void;
 }
 
@@ -99,40 +83,35 @@ function ConversationItem({
   isActive,
   typingUsers,
   onClick,
-isOnline,
+  isOnline,
 }: ConversationItemProps) {
-  console.log("Conversation Item data=>",conversation)
+  console.log('Conversation Item data=>', conversation);
   const displayName = conversation.isGroup
     ? conversation.groupName
-    : conversation.user?.username || "Unknown";
+    : conversation.user?.username || 'Unknown';
 
-
-  const memberCount = conversation.isGroup
-    ? conversation.users?.length
-    : undefined;
+  const memberCount = conversation.isGroup ? conversation.users?.length : undefined;
 
   const lastMessageTime = conversation.lastMessage?.timestamp;
   const isTyping = typingUsers.length > 0;
 
-let typingText = "";
-if (typingUsers.length === 1) {
-  typingText = `${typingUsers[0]} is typing…`;
-} else if (typingUsers.length === 2) {
-  typingText = `${typingUsers[0]}, ${typingUsers[1]} are typing…`;
-} else if (typingUsers.length > 2) {
-  typingText = `${typingUsers.length} people are typing…`;
-}
-
+  let typingText = '';
+  if (typingUsers.length === 1) {
+    typingText = `${typingUsers[0]} is typing…`;
+  } else if (typingUsers.length === 2) {
+    typingText = `${typingUsers[0]}, ${typingUsers[1]} are typing…`;
+  } else if (typingUsers.length > 2) {
+    typingText = `${typingUsers.length} people are typing…`;
+  }
 
   return (
     <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-center gap-3 p-3 rounded-xl transition-all",
-       isActive
-  ? "bg-primary/10 border border-primary/20 text-primary"
-  : "hover:bg-secondary/80 border border-transparent text-muted-foreground"
-
+        'w-full flex items-center gap-3 p-3 rounded-xl transition-all',
+        isActive
+          ? 'bg-primary/10 border border-primary/20 text-primary'
+          : 'hover:bg-secondary/80 border border-transparent text-muted-foreground',
       )}
     >
       <div className="relative">
@@ -143,8 +122,8 @@ if (typingUsers.length === 1) {
         ) : (
           <div
             className={cn(
-              "flex h-12 w-12 items-center justify-center rounded-full text-white text-sm font-semibold",
-              getAvatarColor(displayName)
+              'flex h-12 w-12 items-center justify-center rounded-full text-white text-sm font-semibold',
+              getAvatarColor(displayName),
             )}
           >
             {getInitials(displayName)}
@@ -154,8 +133,8 @@ if (typingUsers.length === 1) {
         {!conversation.isGroup && (
           <div
             className={cn(
-              "absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-sidebar",
-              isOnline ? "bg-green-500" : "bg-muted"
+              'absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-sidebar',
+              isOnline ? 'bg-green-500' : 'bg-muted',
             )}
           />
         )}
@@ -173,9 +152,7 @@ if (typingUsers.length === 1) {
 
           <div className="flex items-center gap-2">
             {lastMessageTime && (
-              <span className="text-xs text-muted-foreground">
-                {formatTime(lastMessageTime)}
-              </span>
+              <span className="text-xs text-muted-foreground">{formatTime(lastMessageTime)}</span>
             )}
             {conversation.unreadCount > 0 && (
               <span className="rounded-full bg-primary px-2 text-xs text-white">
@@ -185,24 +162,19 @@ if (typingUsers.length === 1) {
           </div>
         </div>
 
-      <div
-  className={cn(
-    "text-sm truncate",
-    isActive ? "text-primary" : "text-muted-foreground"
-  )}
->
-
-        {isTyping ? (
-  <span className="flex items-center gap-1 text-primary">
-    <TypingDots />
-    {typingText}
-  </span>
-) : conversation.isGroup ? (
-  `${memberCount} members`
-) : (
-  conversation.lastMessage?.content || "Start a conversation"
-)}
-
+        <div
+          className={cn('text-sm truncate', isActive ? 'text-primary' : 'text-muted-foreground')}
+        >
+          {isTyping ? (
+            <span className="flex items-center gap-1 text-primary">
+              <TypingDots />
+              {typingText}
+            </span>
+          ) : conversation.isGroup ? (
+            `${memberCount} members`
+          ) : (
+            conversation.lastMessage?.content || 'Start a conversation'
+          )}
         </div>
       </div>
     </button>
@@ -216,73 +188,56 @@ if (typingUsers.length === 1) {
 export function ConversationList() {
   const dispatch = useAppDispatch();
 
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [showCreateGroup, setShowCreateGroup] = useState(false);
-  
-const onlineUserIds = useAppSelector((s) => s.presence.onlineUserIds);
-const { translate } = useTranslate();
 
-const { data: users = [], isLoading: usersLoading } =
-  useGetUsersQuery();
-  const [
-  createGroupConversation,
-  { isLoading: creatingGroup },
-] = useCreateGroupConversationMutation();
+  const onlineUserIds = useAppSelector((s) => s.presence.onlineUserIds);
+  const { translate } = useTranslate();
 
+  const { data: users = [], isLoading: usersLoading } = useGetUsersQuery();
+  const [createGroupConversation, { isLoading: creatingGroup }] =
+    useCreateGroupConversationMutation();
 
-console.log("Users data=>",users)
+  console.log('Users data=>', users);
   /* ✅ RTK Query – correct usage */
-const {
-  data: response,
-  isLoading,
-} = useGetSidebarConversationsQuery();
+  const { data: response, isLoading } = useGetSidebarConversationsQuery();
 
-const conversations = response?.data ?? [];
+  const conversations = response?.data ?? [];
 
+  console.log('Sidebar data=>', conversations);
+  const activeConversationId = useAppSelector((state) => state.ui.activeConversationId);
 
-
-  console.log("Sidebar data=>",conversations)
-  const activeConversationId = useAppSelector(
-    (state) => state.ui.activeConversationId
-  );
-
-  const typingByConversation = useAppSelector(
-    (state) => state.typing.byConversation
-  );
+  const typingByConversation = useAppSelector((state) => state.typing.byConversation);
 
   const filtered = conversations.filter((c) => {
     const name = c.isGroup ? c.groupName : c.user?.username;
     return name?.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-const handleCreateGroup = async (
-  name: string,
-  members: { id: string }[]
-) => {
-  try {
-    const memberIds = members.map((u) => u.id);
+  const handleCreateGroup = async (name: string, members: { id: string }[]) => {
+    try {
+      const memberIds = members.map((u) => u.id);
 
-    const res = await createGroupConversation({
-      name,
-      memberIds,
-    }).unwrap();
+      const res = await createGroupConversation({
+        name,
+        memberIds,
+      }).unwrap();
 
-    const conversation = res.data;
+      const conversation = res.data;
 
-    // 1️⃣ Close modal
-    setShowCreateGroup(false);
+      // 1️⃣ Close modal
+      setShowCreateGroup(false);
 
-    // 2️⃣ Open the new group immediately
-    dispatch(setActiveConversationId(conversation.id));
+      // 2️⃣ Open the new group immediately
+      dispatch(setActiveConversationId(conversation.id));
 
-    // 3️⃣ Sidebar will update automatically because:
-    // - cache was updated OR
-    // - Conversations tag was invalidated
-  } catch (err) {
-    console.error("Group creation failed", err);
-  }
-};
-
+      // 3️⃣ Sidebar will update automatically because:
+      // - cache was updated OR
+      // - Conversations tag was invalidated
+    } catch (err) {
+      console.error('Group creation failed', err);
+    }
+  };
 
   return (
     <div className="flex h-full flex-col bg-sidebar">
@@ -312,39 +267,33 @@ const handleCreateGroup = async (
       {/* List */}
       <div className="flex-1 overflow-y-auto p-2 space-y-1">
         {isLoading && (
-          <div className="text-sm text-muted-foreground p-4">
-            Loading conversations…
-          </div>
+          <div className="text-sm text-muted-foreground p-4">Loading conversations…</div>
         )}
 
-    {!isLoading &&
-  filtered.map((conversation) => (
-    <ConversationItem
-      key={conversation.id}
-      conversation={conversation}
-      isActive={conversation.id === activeConversationId}
-       isOnline={
-    !conversation.isGroup &&
-    onlineUserIds.includes(conversation.user?.id ?? "")
-  }
-    typingUsers={typingByConversation[conversation.id] ?? []}
-
-       onClick={() => {
-      dispatch(setActiveConversationId(conversation.id));
-    }}
-    />
-  ))}
-
+        {!isLoading &&
+          filtered.map((conversation) => (
+            <ConversationItem
+              key={conversation.id}
+              conversation={conversation}
+              isActive={conversation.id === activeConversationId}
+              isOnline={
+                !conversation.isGroup && onlineUserIds.includes(conversation.user?.id ?? '')
+              }
+              typingUsers={typingByConversation[conversation.id] ?? []}
+              onClick={() => {
+                dispatch(setActiveConversationId(conversation.id));
+              }}
+            />
+          ))}
       </div>
 
-   <CreateGroupModal
-  open={showCreateGroup}
-  onClose={() => setShowCreateGroup(false)}
-  users={users}
-  onCreateGroup={handleCreateGroup}
-  translate={translate}
-/>
-
+      <CreateGroupModal
+        open={showCreateGroup}
+        onClose={() => setShowCreateGroup(false)}
+        users={users}
+        onCreateGroup={handleCreateGroup}
+        translate={translate}
+      />
     </div>
   );
 }

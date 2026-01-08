@@ -2,12 +2,7 @@ import { ReadReceipt } from '@/types/chat';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { CheckCheck } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface ReadReceiptsModalProps {
   open: boolean;
@@ -17,7 +12,12 @@ interface ReadReceiptsModalProps {
 }
 
 function getInitials(name: string): string {
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function getAvatarColor(name: string): string {
@@ -43,11 +43,16 @@ export function ReadReceiptsModal({ open, onClose, receipts, translate }: ReadRe
             </p>
           ) : (
             receipts.map((receipt, idx) => (
-              <div key={idx} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                <div className={cn(
-                  'flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold text-white',
-                  getAvatarColor(receipt.userName)
-                )}>
+              <div
+                key={idx}
+                className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
+              >
+                <div
+                  className={cn(
+                    'flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold text-white',
+                    getAvatarColor(receipt.userName),
+                  )}
+                >
                   {getInitials(receipt.userName)}
                 </div>
                 <div className="flex-1 min-w-0">

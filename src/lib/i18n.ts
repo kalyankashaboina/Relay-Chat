@@ -1,6 +1,6 @@
 import { Language } from '@/types/chat';
 
-type TranslationKey = 
+type TranslationKey =
   | 'app.title'
   | 'status.online'
   | 'status.offline'

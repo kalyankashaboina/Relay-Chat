@@ -1,7 +1,7 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-export type CallType = "audio" | "video";
-export type CallStatus = "incoming" | "active" | "ended" | "missed";
+export type CallType = 'audio' | 'video';
+export type CallStatus = 'incoming' | 'active' | 'ended' | 'missed';
 
 export interface Call {
   fromUserId: string;
@@ -22,30 +22,27 @@ const initialState: CallsState = {
 };
 
 const callsSlice = createSlice({
-  name: "calls",
+  name: 'calls',
   initialState,
   reducers: {
-    callIncoming(
-      state,
-      action: PayloadAction<{ fromUserId: string; type: CallType }>
-    ) {
+    callIncoming(state, action: PayloadAction<{ fromUserId: string; type: CallType }>) {
       state.activeCall = {
         fromUserId: action.payload.fromUserId,
         type: action.payload.type,
-        status: "incoming",
+        status: 'incoming',
       };
     },
 
     callAccepted(state) {
       if (state.activeCall) {
-        state.activeCall.status = "active";
+        state.activeCall.status = 'active';
         state.activeCall.startedAt = new Date().toISOString();
       }
     },
 
     callEnded(state) {
       if (state.activeCall) {
-        state.activeCall.status = "ended";
+        state.activeCall.status = 'ended';
         state.activeCall.endedAt = new Date().toISOString();
         state.history.unshift(state.activeCall);
         state.activeCall = null;
@@ -54,7 +51,7 @@ const callsSlice = createSlice({
 
     callMissed(state) {
       if (state.activeCall) {
-        state.activeCall.status = "missed";
+        state.activeCall.status = 'missed';
         state.history.unshift(state.activeCall);
         state.activeCall = null;
       }
@@ -66,12 +63,6 @@ const callsSlice = createSlice({
   },
 });
 
-export const {
-  callIncoming,
-  callAccepted,
-  callEnded,
-  callMissed,
-  resetCalls,
-} = callsSlice.actions;
+export const { callIncoming, callAccepted, callEnded, callMissed, resetCalls } = callsSlice.actions;
 
 export default callsSlice.reducer;

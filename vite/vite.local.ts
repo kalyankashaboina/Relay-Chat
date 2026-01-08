@@ -13,5 +13,5 @@ export default mergeConfig(
     build: {
       sourcemap: true,
     },
-  })
+  }),
 );

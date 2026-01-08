@@ -19,16 +19,16 @@ const mockAIResponses = [
   "I'm here to help! What would you like to know?",
   "That's a great question! Let me think about that...",
   "I can help you with that. Here's what I suggest:",
-  "Based on your question, here are some insights:",
+  'Based on your question, here are some insights:',
   "I understand what you're asking. Here's my response:",
 ];
 
 const getAIResponse = async (userMessage: string): Promise<string> => {
-  await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1500));
-  
+  await new Promise((resolve) => setTimeout(resolve, 1000 + Math.random() * 1500));
+
   // Simple mock responses based on keywords
   const lowerMessage = userMessage.toLowerCase();
-  
+
   if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
     return "Hello! 👋 I'm your AI assistant. How can I help you today?";
   }
@@ -41,9 +41,11 @@ const getAIResponse = async (userMessage: string): Promise<string> => {
   if (lowerMessage.includes('thank')) {
     return "You're welcome! 😊 Is there anything else I can help you with?";
   }
-  
-  return mockAIResponses[Math.floor(Math.random() * mockAIResponses.length)] + 
-    "\n\nIs there anything specific you'd like me to elaborate on?";
+
+  return (
+    mockAIResponses[Math.floor(Math.random() * mockAIResponses.length)] +
+    "\n\nIs there anything specific you'd like me to elaborate on?"
+  );
 };
 
 export function AIChat({ translate }: AIChatProps) {
@@ -83,7 +85,7 @@ export function AIChat({ translate }: AIChatProps) {
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
@@ -95,7 +97,7 @@ export function AIChat({ translate }: AIChatProps) {
         content: response,
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, aiMessage]);
+      setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       console.error('AI response error:', error);
     } finally {
@@ -113,7 +115,7 @@ export function AIChat({ translate }: AIChatProps) {
           'text-white shadow-lg shadow-purple-500/30',
           'hover:shadow-xl hover:shadow-purple-500/40 transition-all duration-300',
           'animate-pulse-slow',
-          'md:bottom-6'
+          'md:bottom-6',
         )}
         title="Open AI Assistant"
       >
@@ -128,7 +130,7 @@ export function AIChat({ translate }: AIChatProps) {
         'fixed z-50 bg-card border border-border rounded-2xl shadow-2xl overflow-hidden transition-all duration-300',
         isMinimized
           ? 'bottom-20 right-4 w-72 h-14 md:bottom-6'
-          : 'bottom-20 right-4 w-[calc(100%-2rem)] max-w-sm h-[70vh] max-h-[500px] md:bottom-6 md:right-6 md:w-96'
+          : 'bottom-20 right-4 w-[calc(100%-2rem)] max-w-sm h-[70vh] max-h-[500px] md:bottom-6 md:right-6 md:w-96',
       )}
     >
       {/* Header */}
@@ -139,9 +141,7 @@ export function AIChat({ translate }: AIChatProps) {
           </div>
           <div>
             <h3 className="font-semibold text-sm">AI Assistant</h3>
-            {!isMinimized && (
-              <p className="text-xs text-white/70">Always here to help</p>
-            )}
+            {!isMinimized && <p className="text-xs text-white/70">Always here to help</p>}
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -167,17 +167,14 @@ export function AIChat({ translate }: AIChatProps) {
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={cn(
-                  'flex',
-                  message.role === 'user' ? 'justify-end' : 'justify-start'
-                )}
+                className={cn('flex', message.role === 'user' ? 'justify-end' : 'justify-start')}
               >
                 <div
                   className={cn(
                     'max-w-[85%] rounded-2xl px-4 py-2.5 text-sm',
                     message.role === 'user'
                       ? 'bg-primary text-primary-foreground rounded-br-md'
-                      : 'bg-muted rounded-bl-md'
+                      : 'bg-muted rounded-bl-md',
                   )}
                 >
                   <p className="whitespace-pre-wrap">{message.content}</p>

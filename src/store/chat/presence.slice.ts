@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface PresenceState {
   onlineUserIds: string[];
@@ -9,7 +9,7 @@ const initialState: PresenceState = {
 };
 
 const presenceSlice = createSlice({
-  name: "presence",
+  name: 'presence',
   initialState,
   reducers: {
     setOnlineUsers(state, action: PayloadAction<string[]>) {
@@ -23,9 +23,7 @@ const presenceSlice = createSlice({
     },
 
     userOffline(state, action: PayloadAction<string>) {
-      state.onlineUserIds = state.onlineUserIds.filter(
-        (id) => id !== action.payload
-      );
+      state.onlineUserIds = state.onlineUserIds.filter((id) => id !== action.payload);
     },
 
     resetPresence() {
@@ -34,11 +32,6 @@ const presenceSlice = createSlice({
   },
 });
 
-export const {
-  setOnlineUsers,
-  userOnline,
-  userOffline,
-  resetPresence,
-} = presenceSlice.actions;
+export const { setOnlineUsers, userOnline, userOffline, resetPresence } = presenceSlice.actions;
 
 export default presenceSlice.reducer;

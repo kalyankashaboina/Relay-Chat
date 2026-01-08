@@ -1,5 +1,5 @@
-import { api } from "@/store/api";
-import type { Message } from "@/types/chat";
+import { api } from '@/store/api';
+import type { Message } from '@/types/chat';
 
 /* ===============================
    API RESPONSE TYPES
@@ -33,18 +33,15 @@ export const messagesApi = api.injectEndpoints({
         result
           ? [
               ...result.data.map((m) => ({
-                type: "Messages" as const,
+                type: 'Messages' as const,
                 id: m.id,
               })),
-              { type: "Messages", id: conversationId },
+              { type: 'Messages', id: conversationId },
             ]
-          : [{ type: "Messages", id: conversationId }],
+          : [{ type: 'Messages', id: conversationId }],
     }),
   }),
   overrideExisting: false,
 });
 
-export const {
-  useGetConversationMessagesQuery,
-  useLazyGetConversationMessagesQuery,
-} = messagesApi;
+export const { useGetConversationMessagesQuery, useLazyGetConversationMessagesQuery } = messagesApi;

@@ -1,5 +1,5 @@
-import { api } from "@/store/api";
-import type { Conversation } from "@/types/chat";
+import { api } from '@/store/api';
+import type { Conversation } from '@/types/chat';
 
 /* ===============================
    API RESPONSE TYPES
@@ -24,18 +24,12 @@ interface CreateGroupPayload {
 export const conversationsApi = api.injectEndpoints({
   endpoints: (builder) => ({
     /* ---------- Sidebar conversations ---------- */
-    getSidebarConversations: builder.query<
-      SidebarConversationsResponse,
-      void
-    >({
-      query: () => "/api/conversations",
-      providesTags: ["Conversations"],
+    getSidebarConversations: builder.query<SidebarConversationsResponse, void>({
+      query: () => '/api/conversations',
+      providesTags: ['Conversations'],
     }),
 
-    searchSidebarConversations: builder.query<
-      SidebarConversationsResponse,
-      { q: string }
-    >({
+    searchSidebarConversations: builder.query<SidebarConversationsResponse, { q: string }>({
       query: ({ q }) => `/api/conversations/search?q=${q}`,
     }),
 
@@ -45,11 +39,11 @@ export const conversationsApi = api.injectEndpoints({
       { userId: string }
     >({
       query: (body) => ({
-        url: "/api/conversations",
-        method: "POST",
+        url: '/api/conversations',
+        method: 'POST',
         body,
       }),
-      invalidatesTags: ["Conversations"],
+      invalidatesTags: ['Conversations'],
     }),
 
     /* ---------- Group chat (OPTIMISTIC UI) ---------- */
@@ -58,15 +52,12 @@ export const conversationsApi = api.injectEndpoints({
       CreateGroupPayload
     >({
       query: (body) => ({
-        url: "/api/conversations/group",
-        method: "POST",
+        url: '/api/conversations/group',
+        method: 'POST',
         body,
       }),
 
-      async onQueryStarted(
-        { name, memberIds },
-        { dispatch, queryFulfilled, getState }
-      ) {
+      async onQueryStarted({ name, memberIds }, { dispatch, queryFulfilled, getState }) {
         const state = getState() as any;
         const currentUser = state.auth.user;
 
@@ -84,15 +75,15 @@ export const conversationsApi = api.injectEndpoints({
             {
               id: currentUser.id,
               username: currentUser.username,
-              email: currentUser.email ?? "pending@local", 
-              avatar: currentUser.avatar ?? "",
+              email: currentUser.email ?? 'pending@local',
+              avatar: currentUser.avatar ?? '',
               isOnline: true,
             },
             ...memberIds.map((id) => ({
               id,
-              username: "Loading...",
-              email: "pending@local", 
-              avatar: "",
+              username: 'Loading...',
+              email: 'pending@local',
+              avatar: '',
               isOnline: false,
             })),
           ],
@@ -104,13 +95,9 @@ export const conversationsApi = api.injectEndpoints({
 
         /* ---------- INSERT IMMEDIATELY ---------- */
         const patchResult = dispatch(
-          conversationsApi.util.updateQueryData(
-            "getSidebarConversations",
-            undefined,
-            (draft) => {
-              draft.data.unshift(optimisticConversation);
-            }
-          )
+          conversationsApi.util.updateQueryData('getSidebarConversations', undefined, (draft) => {
+            draft.data.unshift(optimisticConversation);
+          }),
         );
 
         try {
@@ -118,18 +105,12 @@ export const conversationsApi = api.injectEndpoints({
 
           /* ---------- REPLACE TEMP WITH SERVER DATA ---------- */
           dispatch(
-            conversationsApi.util.updateQueryData(
-              "getSidebarConversations",
-              undefined,
-              (draft) => {
-                const index = draft.data.findIndex(
-                  (c) => c.id === tempId
-                );
-                if (index !== -1) {
-                  draft.data[index] = data.data;
-                }
+            conversationsApi.util.updateQueryData('getSidebarConversations', undefined, (draft) => {
+              const index = draft.data.findIndex((c) => c.id === tempId);
+              if (index !== -1) {
+                draft.data[index] = data.data;
               }
-            )
+            }),
           );
         } catch {
           /* ---------- ROLLBACK ---------- */
@@ -137,7 +118,7 @@ export const conversationsApi = api.injectEndpoints({
         }
       },
 
-      invalidatesTags: ["Conversations"],
+      invalidatesTags: ['Conversations'],
     }),
   }),
 

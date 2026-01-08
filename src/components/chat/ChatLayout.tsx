@@ -1,30 +1,26 @@
 // src/components/chat/ChatLayout.tsx
 
-import { useMemo, useState } from "react";
-import { cn } from "@/lib/utils";
-import { useAppSelector } from "@/store/hooks";
+import { useMemo, useState } from 'react';
+import { cn } from '@/lib/utils';
+import { useAppSelector } from '@/store/hooks';
 
-import { ConversationList } from "./ConversationList";
-import { ChatWindow } from "./ChatWindow";
-import { NetworkStatusBar } from "./NetworkStatusBar";
-import { CallHistory } from "./CallHistory";
-import { UsersList } from "./UsersList";
-import { NotificationPrompt } from "./NotificationPrompt";
+import { ConversationList } from './ConversationList';
+import { ChatWindow } from './ChatWindow';
+import { NetworkStatusBar } from './NetworkStatusBar';
+import { CallHistory } from './CallHistory';
+import { UsersList } from './UsersList';
+import { NotificationPrompt } from './NotificationPrompt';
 
-import { MessageSquare, Phone, UserPlus } from "lucide-react";
-import type { CallRecord, CallType, User } from "@/types/chat";
-import { useTranslate } from "@/hooks/useTranslate";
+import { MessageSquare, Phone, UserPlus } from 'lucide-react';
+import type { CallRecord, CallType, User } from '@/types/chat';
+import { useTranslate } from '@/hooks/useTranslate';
 
-type TabType = "chats" | "calls" | "users";
-
-
+type TabType = 'chats' | 'calls' | 'users';
 
 export function ChatLayout() {
-  const [activeTab, setActiveTab] = useState<TabType>("chats");
+  const [activeTab, setActiveTab] = useState<TabType>('chats');
 
-  const showConversationList = useAppSelector(
-    (state) => state.ui.showConversationList
-  );
+  const showConversationList = useAppSelector((state) => state.ui.showConversationList);
   const { translate } = useTranslate();
 
   /* ===============================
@@ -39,26 +35,18 @@ export function ChatLayout() {
       type: call.type,
       user: {
         id: call.fromUserId,
-        username: "Unknown",
-        email: "",
-        avatar: "",
+        username: 'Unknown',
+        email: '',
+        avatar: '',
         isOnline: false,
       },
-      timestamp: call.startedAt
-        ? new Date(call.startedAt)
-        : new Date(),
+      timestamp: call.startedAt ? new Date(call.startedAt) : new Date(),
       duration:
         call.startedAt && call.endedAt
-          ? (new Date(call.endedAt).getTime() -
-              new Date(call.startedAt).getTime()) /
-            1000
+          ? (new Date(call.endedAt).getTime() - new Date(call.startedAt).getTime()) / 1000
           : 0,
       status:
-        call.status === "missed"
-          ? "missed"
-          : call.status === "ended"
-          ? "completed"
-          : "declined",
+        call.status === 'missed' ? 'missed' : call.status === 'ended' ? 'completed' : 'declined',
       isOutgoing: true,
     }));
   }, [rawCalls]);
@@ -71,28 +59,28 @@ export function ChatLayout() {
   const existingConversationUserIds: string[] = [];
 
   const handleCallBack = (user: User, type: CallType) => {
-    console.log("[CALL BACK]", user, type);
+    console.log('[CALL BACK]', user, type);
   };
 
   const handleStartChat = (user: User) => {
-    console.log("[START CHAT]", user);
+    console.log('[START CHAT]', user);
   };
 
   const tabs = [
     {
-      id: "chats" as const,
-      label: translate("tabs.chats"),
+      id: 'chats' as const,
+      label: translate('tabs.chats'),
       icon: MessageSquare,
     },
     {
-      id: "calls" as const,
-      label: translate("tabs.calls"),
+      id: 'calls' as const,
+      label: translate('tabs.calls'),
       icon: Phone,
-      count: callHistory.filter((c) => c.status === "missed").length,
+      count: callHistory.filter((c) => c.status === 'missed').length,
     },
     {
-      id: "users" as const,
-      label: translate("tabs.users"),
+      id: 'users' as const,
+      label: translate('tabs.users'),
       icon: UserPlus,
     },
   ];
@@ -105,8 +93,8 @@ export function ChatLayout() {
         {/* Sidebar */}
         <div
           className={cn(
-            "w-full flex-shrink-0 border-r border-border md:w-80 lg:w-96 flex flex-col bg-card/50",
-            showConversationList ? "flex" : "hidden md:flex"
+            'w-full flex-shrink-0 border-r border-border md:w-80 lg:w-96 flex flex-col bg-card/50',
+            showConversationList ? 'flex' : 'hidden md:flex',
           )}
         >
           {/* Tabs */}
@@ -118,10 +106,10 @@ export function ChatLayout() {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-1.5 py-3.5 text-sm font-medium transition-all",
+                    'flex-1 flex items-center justify-center gap-1.5 py-3.5 text-sm font-medium transition-all',
                     activeTab === tab.id
-                      ? "text-primary border-b-2 border-primary bg-primary/5"
-                      : "text-muted-foreground hover:text-foreground"
+                      ? 'text-primary border-b-2 border-primary bg-primary/5'
+                      : 'text-muted-foreground hover:text-foreground',
                   )}
                 >
                   <Icon className="h-4 w-4" />
@@ -138,17 +126,13 @@ export function ChatLayout() {
 
           {/* Tab content */}
           <div className="flex-1 overflow-hidden">
-            {activeTab === "chats" && <ConversationList />}
+            {activeTab === 'chats' && <ConversationList />}
 
-            {activeTab === "calls" && (
-              <CallHistory
-                calls={callHistory}
-                onCallBack={handleCallBack}
-                translate={translate}
-              />
+            {activeTab === 'calls' && (
+              <CallHistory calls={callHistory} onCallBack={handleCallBack} translate={translate} />
             )}
 
-            {activeTab === "users" && (
+            {activeTab === 'users' && (
               <UsersList
                 users={users}
                 existingConversationUserIds={existingConversationUserIds}
@@ -162,8 +146,8 @@ export function ChatLayout() {
         {/* Main chat */}
         <div
           className={cn(
-            "flex-1 flex flex-col min-w-0",
-            showConversationList ? "hidden md:flex" : "flex"
+            'flex-1 flex flex-col min-w-0',
+            showConversationList ? 'hidden md:flex' : 'flex',
           )}
         >
           <ChatWindow />

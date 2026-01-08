@@ -12,16 +12,19 @@ interface MessageSearchProps {
   translate: (key: string) => string;
 }
 
-export function MessageSearch({ messages, onClose, onNavigateToMessage, translate }: MessageSearchProps) {
+export function MessageSearch({
+  messages,
+  onClose,
+  onNavigateToMessage,
+  translate,
+}: MessageSearchProps) {
   const [query, setQuery] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const results = useMemo(() => {
     if (!query.trim()) return [];
     const lowerQuery = query.toLowerCase();
-    return messages.filter(m => 
-      !m.isDeleted && m.content.toLowerCase().includes(lowerQuery)
-    );
+    return messages.filter((m) => !m.isDeleted && m.content.toLowerCase().includes(lowerQuery));
   }, [messages, query]);
 
   const handlePrev = () => {
@@ -50,13 +53,16 @@ export function MessageSearch({ messages, onClose, onNavigateToMessage, translat
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             value={query}
-            onChange={(e) => { setQuery(e.target.value); setCurrentIndex(0); }}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setCurrentIndex(0);
+            }}
             placeholder={translate('input.search')}
             className="pl-10 bg-secondary border-0"
             autoFocus
           />
         </div>
-        
+
         {results.length > 0 && (
           <div className="flex items-center gap-1">
             <span className="text-sm text-muted-foreground whitespace-nowrap">
@@ -76,15 +82,12 @@ export function MessageSearch({ messages, onClose, onNavigateToMessage, translat
             </button>
           </div>
         )}
-        
-        <button
-          onClick={onClose}
-          className="p-2 rounded-md hover:bg-muted transition-colors"
-        >
+
+        <button onClick={onClose} className="p-2 rounded-md hover:bg-muted transition-colors">
           <X className="h-5 w-5" />
         </button>
       </div>
-      
+
       {/* Results list */}
       {query.trim() && results.length > 0 && (
         <div className="max-h-64 overflow-y-auto border-t border-border">
@@ -94,7 +97,7 @@ export function MessageSearch({ messages, onClose, onNavigateToMessage, translat
               onClick={() => handleResultClick(index)}
               className={cn(
                 'w-full text-left p-3 hover:bg-muted/50 transition-colors border-b border-border/50 last:border-0',
-                index === currentIndex && 'bg-primary/10'
+                index === currentIndex && 'bg-primary/10',
               )}
             >
               <div className="flex items-center justify-between gap-2 mb-1">
@@ -117,7 +120,7 @@ export function MessageSearch({ messages, onClose, onNavigateToMessage, translat
           )}
         </div>
       )}
-      
+
       {query.trim() && results.length === 0 && (
         <div className="p-4 text-center text-sm text-muted-foreground border-t border-border">
           No messages found
@@ -130,9 +133,13 @@ export function MessageSearch({ messages, onClose, onNavigateToMessage, translat
 function highlightMatch(text: string, query: string) {
   if (!query.trim()) return text;
   const parts = text.split(new RegExp(`(${query})`, 'gi'));
-  return parts.map((part, i) => 
-    part.toLowerCase() === query.toLowerCase() 
-      ? <mark key={i} className="bg-primary/30 text-foreground rounded px-0.5">{part}</mark>
-      : part
+  return parts.map((part, i) =>
+    part.toLowerCase() === query.toLowerCase() ? (
+      <mark key={i} className="bg-primary/30 text-foreground rounded px-0.5">
+        {part}
+      </mark>
+    ) : (
+      part
+    ),
   );
 }

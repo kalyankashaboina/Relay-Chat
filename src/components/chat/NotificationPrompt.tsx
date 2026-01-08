@@ -44,7 +44,7 @@ export function NotificationPrompt({ translate }: NotificationPromptProps) {
         >
           <X className="h-4 w-4 text-muted-foreground" />
         </button>
-        
+
         <div className="flex gap-3">
           <div className="flex-shrink-0 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
             <Bell className="h-5 w-5 text-primary" />

@@ -41,7 +41,7 @@ export function VoiceRecorder({ onSend, onCancel, translate }: VoiceRecorderProp
         const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
         setAudioBlob(blob);
         setAudioUrl(URL.createObjectURL(blob));
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
       };
 
       mediaRecorder.start();
@@ -49,7 +49,7 @@ export function VoiceRecorder({ onSend, onCancel, translate }: VoiceRecorderProp
       setDuration(0);
 
       timerRef.current = setInterval(() => {
-        setDuration(d => d + 1);
+        setDuration((d) => d + 1);
       }, 1000);
     } catch (error) {
       console.error('Microphone access denied:', error);
@@ -97,15 +97,15 @@ export function VoiceRecorder({ onSend, onCancel, translate }: VoiceRecorderProp
         >
           <Trash2 className="h-5 w-5" />
         </button>
-        
+
         <div className="flex-1">
           <audio src={audioUrl} controls className="w-full h-8" />
         </div>
-        
+
         <span className="text-sm font-medium text-muted-foreground min-w-[40px]">
           {formatDuration(duration)}
         </span>
-        
+
         <button
           onClick={handleSend}
           className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-lg"
@@ -124,7 +124,7 @@ export function VoiceRecorder({ onSend, onCancel, translate }: VoiceRecorderProp
       >
         <X className="h-5 w-5" />
       </button>
-      
+
       <div className="flex-1 flex items-center gap-3">
         {isRecording && (
           <>
@@ -139,7 +139,7 @@ export function VoiceRecorder({ onSend, onCancel, translate }: VoiceRecorderProp
                   className="w-1 bg-primary rounded-full animate-pulse"
                   style={{
                     height: `${Math.random() * 20 + 8}px`,
-                    animationDelay: `${i * 50}ms`
+                    animationDelay: `${i * 50}ms`,
                   }}
                 />
               ))}
@@ -150,14 +150,14 @@ export function VoiceRecorder({ onSend, onCancel, translate }: VoiceRecorderProp
           {formatDuration(duration)}
         </span>
       </div>
-      
+
       <button
         onClick={isRecording ? stopRecording : startRecording}
         className={cn(
           'flex h-12 w-12 items-center justify-center rounded-full transition-all shadow-lg',
           isRecording
             ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
-            : 'bg-primary text-primary-foreground hover:bg-primary/90'
+            : 'bg-primary text-primary-foreground hover:bg-primary/90',
         )}
       >
         {isRecording ? <Square className="h-5 w-5" /> : <Mic className="h-5 w-5" />}

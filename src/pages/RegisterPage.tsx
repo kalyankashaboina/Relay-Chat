@@ -1,67 +1,54 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 
-import { useAppDispatch } from "@/store/hooks";
-import { registerUser } from "@/store/auth/auth.thunks";
+import { useAppDispatch } from '@/store/hooks';
+import { registerUser } from '@/store/auth/auth.thunks';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
-import {
-  MessageSquare,
-  Mail,
-  Lock,
-  User,
-  Loader2,
-  ArrowRight,
-} from "lucide-react";
+import { MessageSquare, Mail, Lock, User, Loader2, ArrowRight } from 'lucide-react';
 
-import { toast } from "sonner";
+import { toast } from 'sonner';
 
 export default function RegisterPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    if (!name || !email || !password || !confirmPassword) {
+      toast.error('Please fill in all fields');
+      return;
+    }
 
-  if (!name || !email || !password || !confirmPassword) {
-    toast.error("Please fill in all fields");
-    return;
-  }
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
 
-  if (password !== confirmPassword) {
-    toast.error("Passwords do not match");
-    return;
-  }
+    if (password.length < 8) {
+      toast.error('Password must be at least 8 characters');
+      return;
+    }
 
-  if (password.length < 8) {
-    toast.error("Password must be at least 8 characters");
-    return;
-  }
+    try {
+      await dispatch(registerUser(name, email, password));
 
-  try {
-    await dispatch(registerUser(name, email, password));
-
-    toast.success("Account created successfully");
-    navigate("/");
-  } catch (err: any) {
-    toast.error(
-      err?.response?.data?.message ||
-      err?.message ||
-      "Registration failed"
-    );
-  }
-};
-
+      toast.success('Account created successfully');
+      navigate('/');
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || err?.message || 'Registration failed');
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
@@ -74,9 +61,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           <h1 className="mt-6 text-3xl font-bold tracking-tight text-foreground">
             Create your account
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Get started in just a few steps
-          </p>
+          <p className="mt-2 text-sm text-muted-foreground">Get started in just a few steps</p>
         </div>
 
         {/* Form */}
@@ -128,9 +113,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   disabled={isLoading}
                 />
               </div>
-              <p className="text-xs text-muted-foreground">
-                Must be at least 8 characters
-              </p>
+              <p className="text-xs text-muted-foreground">Must be at least 8 characters</p>
             </div>
 
             <div className="space-y-2">
@@ -150,12 +133,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             </div>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            size="lg"
-            disabled={isLoading}
-          >
+          <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -172,7 +150,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
         {/* Login link */}
         <p className="text-center text-sm text-muted-foreground">
-          Already have an account?{" "}
+          Already have an account?{' '}
           <Link
             to="/login"
             className="font-medium text-primary hover:text-primary/80 transition-colors"
