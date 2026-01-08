@@ -35,6 +35,7 @@ import { mapApiMessageToChatMessage, mapChatMessageToUI } from "@/utils/mapChatM
 import { useGetConversationMessagesQuery } from "@/store/chat/messages.api";
 import { messageAdded } from "@/store/chat/messages.slice";
 import { useGetSidebarConversationsQuery } from "@/store/chat/conversations.api";
+import { showSidebar } from "@/store/ui/ui.slice";
 
 /* -----------------------------
    Helpers
@@ -175,6 +176,10 @@ useEffect(() => {
     ? onlineUserIds.includes(activeConversation.user?.id ?? "")
     : false;
 
+      const handleGoBack = () => {
+    dispatch(showSidebar());
+  }
+
   return (
     <>
       <div className="flex h-full flex-col bg-background">
@@ -185,7 +190,7 @@ useEffect(() => {
               variant="ghost"
               size="icon"
               className="md:hidden"
-              onClick={() => {}}
+            onClick={handleGoBack}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
