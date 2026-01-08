@@ -22,18 +22,24 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (isLoading) return;
+
     if (!email || !password) {
       toast.error('Please fill in all fields');
       return;
     }
 
     try {
+      setIsLoading(true);
+
       await dispatch(loginUser(email, password));
 
       toast.success('Welcome back');
       navigate('/');
     } catch (err: any) {
       toast.error(err?.message || 'Login failed');
+    } finally {
+      setIsLoading(false);
     }
   };
 
