@@ -88,3 +88,19 @@ export function emitCallInitiate(payload: {
   console.log("[SOCKET][emit] call:initiate", payload);
   socket.emit("call:initiate", payload);
 }
+
+
+/* =========================
+   CONVERSATIONS
+========================= */
+
+export function emitJoinConversation(conversationId: string) {
+  const socket = getSocket();
+  if (!socket) {
+    console.warn("[SOCKET][emit] conversation:join → no socket");
+    return;
+  }
+
+  console.log("[SOCKET][emit] conversation:join", { conversationId });
+  socket.emit("conversation:join", { conversationId });
+}

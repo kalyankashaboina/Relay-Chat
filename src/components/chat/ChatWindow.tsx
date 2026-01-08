@@ -172,9 +172,23 @@ useEffect(() => {
     ? activeConversation.groupName
     : activeConversation.user?.username ?? "Unknown";
 
-  const isOnline = !isGroup
-    ? onlineUserIds.includes(activeConversation.user?.id ?? "")
-    : false;
+const isDirectOnline =
+  !isGroup &&
+  onlineUserIds.includes(activeConversation.user?.id ?? "");
+
+
+
+    // const isGroup = activeConversation.isGroup;
+
+const groupMemberIds = isGroup
+  ? activeConversation.users.map((u) => u.id)
+  : [];
+
+const onlineGroupMembers = groupMemberIds.filter((id) =>
+  onlineUserIds.includes(id)
+);
+
+const onlineCount = onlineGroupMembers.length;
 
       const handleGoBack = () => {
     dispatch(showSidebar());
@@ -206,9 +220,21 @@ useEffect(() => {
 
             <div className="min-w-0">
               <h3 className="font-semibold truncate">{displayName}</h3>
-              <p className="text-xs text-muted-foreground">
-                {isOnline ? t("status.online") : t("status.offline")}
-              </p>
+
+         <p className="text-xs text-muted-foreground">
+  {!isGroup && (
+    isDirectOnline ? t("status.online") : t("status.offline")
+  )}
+
+  {isGroup && (
+    onlineCount > 0
+      ? `${onlineCount} online`
+      : "All offline"
+  )}
+</p>
+
+
+
             </div>
           </div>
 

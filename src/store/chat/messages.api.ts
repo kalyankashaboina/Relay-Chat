@@ -1,5 +1,9 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { api } from "@/store/api";
 import type { Message } from "@/types/chat";
+
+/* ===============================
+   API RESPONSE TYPES
+================================ */
 
 export interface MessagesResponse {
   success: boolean;
@@ -8,16 +12,11 @@ export interface MessagesResponse {
   hasMore: boolean;
 }
 
-export const messagesApi = createApi({
-  reducerPath: "messagesApi",
+/* ===============================
+   MESSAGES API
+================================ */
 
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_BASE_URL,
-    credentials: "include",
-  }),
-
-  tagTypes: ["Messages"],
-
+export const messagesApi = api.injectEndpoints({
   endpoints: (builder) => ({
     /* ---------- Get messages for a conversation ---------- */
 
@@ -42,6 +41,7 @@ export const messagesApi = createApi({
           : [{ type: "Messages", id: conversationId }],
     }),
   }),
+  overrideExisting: false,
 });
 
 export const {
