@@ -9,37 +9,47 @@ export default mergeConfig(
       sourcemap: false,
       minify: 'esbuild',
       cssCodeSplit: true,
+
+      chunkSizeWarningLimit: 800,
+
       rollupOptions: {
         output: {
           manualChunks: {
             react: ['react', 'react-dom'],
+            redux: ['@reduxjs/toolkit', 'react-redux'],
             vendor: ['axios', 'socket.io-client'],
           },
         },
       },
     },
+
     plugins: [
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'placeholder.svg'],
+
+        includeAssets: ['favicon.ico', 'relay-fav-icon.png', 'robots.txt'],
+
         manifest: {
-          name: 'Chat App',
-          short_name: 'Chat',
-          description: 'Real-time chat application with AI assistant',
+          name: 'Relay Chat',
+          short_name: 'Relay',
+          description:
+            'Relay Chat is a modern real-time messaging application with group chats, online presence, and AI-assisted conversations.',
           theme_color: '#1a1a2e',
-          background_color: '#1a1a2e',
+          background_color: '#0a0a0a',
           display: 'standalone',
+          orientation: 'portrait',
+          scope: '/',
           start_url: '/',
           icons: [
             {
-              src: '/placeholder.svg',
+              src: '/pwa-icon.png',
               sizes: '192x192',
-              type: 'image/svg+xml',
+              type: 'image/png',
             },
             {
-              src: '/placeholder.svg',
+              src: '/pwa-icon.png',
               sizes: '512x512',
-              type: 'image/svg+xml',
+              type: 'image/png',
             },
           ],
         },

@@ -6,31 +6,51 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
-    <title>ChatApp - Modern Messaging</title>
+
+    <title>Relay Chat</title>
+
     <meta
       name="description"
-      content="A modern chat application with voice messages, vanish mode, and real-time messaging"
+      content="Relay Chat is a modern real-time messaging application with group chats, online presence, and AI-assisted conversations."
     />
-    <meta name="author" content="Lovable" />
-    <meta name="theme-color" content="#6366f1" />
+    <meta name="author" content="Relay Chat" />
+    <meta name="theme-color" content="#1a1a2e" />
+
+    <!-- PWA / iOS support -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="ChatApp" />
+    <meta name="apple-mobile-web-app-title" content="Relay Chat" />
 
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="apple-touch-icon" href="/favicon.ico" />
+    <!-- ✅ Favicon -->
+    <link rel="icon" type="image/png" href="/relay-fav-icon.png" />
+    <!-- <link rel="icon" href="/favicon.ico" /> -->
 
-    <meta property="og:title" content="ChatApp - Modern Messaging" />
+    <!-- Apple touch icon (iOS home screen) -->
+    <link rel="apple-touch-icon" href="/relay-fav-icon.png" />
+
+    <!-- NOTE:
+      We intentionally DO NOT link /manifest.json here.
+      vite-plugin-pwa injects the correct manifest automatically.
+    -->
+    <!-- <link rel="manifest" href="/manifest.json" /> -->
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Relay Chat" />
     <meta
       property="og:description"
-      content="A modern chat application with voice messages, vanish mode, and real-time messaging"
+      content="A real-time chat application with group messaging, presence, and AI assistance."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:image" content="/relay-fav-icon.png" />
 
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@Lovable" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta name="twitter:title" content="Relay Chat" />
+    <meta
+      name="twitter:description"
+      content="A real-time chat application with group messaging, presence, and AI assistance."
+    />
+    <meta name="twitter:image" content="/relay-fav-icon.png" />
 
     <style>
       /* Prevent overscroll bounce on iOS */
@@ -39,9 +59,12 @@
         overscroll-behavior: none;
         -webkit-overflow-scrolling: touch;
       }
+
       /* Safe area insets for notched devices */
       body {
-        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+        padding: env(safe-area-inset-top)
+          env(safe-area-inset-right)
+          env(safe-area-inset-bottom)
           env(safe-area-inset-left);
       }
     </style>
