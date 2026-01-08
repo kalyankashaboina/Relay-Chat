@@ -1,21 +1,30 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { User } from '@/types/chat';
 import { cn } from '@/lib/utils';
 import { X, Users, Check, Search } from 'lucide-react';
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+
 import { useAppSelector } from '@/store/hooks';
+import { useGetUsersQuery } from '@/store/users/users.api';
+import { useDebounce } from '@/hooks/useDebounce';
+
+/* ===============================
+   Props
+================================ */
 
 interface CreateGroupModalProps {
   open: boolean;
   onClose: () => void;
-  users: User[];
   onCreateGroup: (name: string, members: User[]) => void;
   translate: (key: string) => string;
 }
 
-/* ---------------- Helpers ---------------- */
+/* ===============================
+   Helpers
+================================ */
 
 function getInitials(username: string): string {
   return username
@@ -31,33 +40,65 @@ function getAvatarColor(username: string): string {
   return colors[username.charCodeAt(0) % colors.length];
 }
 
-/* ---------------- Component ---------------- */
+/* ===============================
+   Component
+================================ */
 
 export function CreateGroupModal({
   open,
   onClose,
-  users,
   onCreateGroup,
   translate,
 }: CreateGroupModalProps) {
-  const [groupName, setGroupName] = useState('');
-  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-
   const currentUserId = useAppSelector((s) => s.auth.user?.id);
 
-  /* Exclude self + guard against bad data */
-  const availableUsers = useMemo(
-    () => users.filter((u) => u.id !== currentUserId && Boolean(u.username) && Boolean(u.email)),
-    [users, currentUserId],
-  );
+  const [groupName, setGroupName] = useState('');
+  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
 
-  const filteredUsers = useMemo(() => {
-    const q = searchQuery.toLowerCase();
-    return availableUsers.filter(
-      (user) => user.username.toLowerCase().includes(q) || user.email.toLowerCase().includes(q),
-    );
-  }, [availableUsers, searchQuery]);
+  const [cursor, setCursor] = useState<string | undefined>(undefined);
+
+  /* ===============================
+     API CALL (SINGLE ENDPOINT)
+  ================================ */
+
+  const { data, isFetching, isError } = useGetUsersQuery({
+    q: debouncedSearch,
+    cursor,
+    limit: 20,
+  });
+
+  const users = (data?.data ?? []).filter((u) => u.id !== currentUserId);
+  const hasMore = data?.hasMore ?? false;
+  const nextCursor = data?.nextCursor ?? null;
+
+  const listRef = useRef<HTMLDivElement>(null);
+
+  /* ===============================
+     Reset pagination on open/search
+  ================================ */
+
+  useEffect(() => {
+    setCursor(undefined);
+  }, [debouncedSearch, open]);
+
+  /* ===============================
+     Infinite scroll
+  ================================ */
+
+  const handleScroll = () => {
+    const el = listRef.current;
+    if (!el || isFetching || !hasMore || !nextCursor) return;
+
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 40) {
+      setCursor(nextCursor);
+    }
+  };
+
+  /* ===============================
+     Selection logic
+  ================================ */
 
   const toggleUser = (user: User) => {
     setSelectedUsers((prev) =>
@@ -68,12 +109,12 @@ export function CreateGroupModal({
   const resetState = () => {
     setGroupName('');
     setSelectedUsers([]);
-    setSearchQuery('');
+    setSearch('');
+    setCursor(undefined);
   };
 
   const handleCreate = () => {
     if (!groupName.trim() || selectedUsers.length < 2) return;
-
     onCreateGroup(groupName.trim(), selectedUsers);
     resetState();
     onClose();
@@ -85,6 +126,10 @@ export function CreateGroupModal({
       onClose();
     }
   };
+
+  /* ===============================
+     Render
+  ================================ */
 
   return (
     <Dialog open={open} onOpenChange={handleDialogChange}>
@@ -121,10 +166,7 @@ export function CreateGroupModal({
                   className="flex items-center gap-1.5 bg-primary/10 text-primary rounded-full px-2.5 py-1 text-sm"
                 >
                   <span>{user.username.split(' ')[0]}</span>
-                  <button
-                    onClick={() => toggleUser(user)}
-                    className="ml-0.5 hover:text-destructive transition-colors"
-                  >
+                  <button onClick={() => toggleUser(user)} className="hover:text-destructive">
                     <X className="h-3 w-3" />
                   </button>
                 </div>
@@ -136,75 +178,87 @@ export function CreateGroupModal({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder={translate('input.searchUsers')}
               className="pl-10"
             />
           </div>
 
           {/* User List */}
-          <div className="max-h-60 overflow-y-auto space-y-1 rounded-lg border border-border p-1">
-            {filteredUsers.length === 0 ? (
-              <div className="py-8 text-center text-muted-foreground text-sm">
-                {translate('users.empty')}
-              </div>
-            ) : (
-              filteredUsers.map((user) => {
-                const isSelected = selectedUsers.some((u) => u.id === user.id);
+          <div
+            ref={listRef}
+            onScroll={handleScroll}
+            className="max-h-60 overflow-y-auto space-y-1 rounded-lg border border-border p-1"
+          >
+            {/* Error */}
+            {isError && (
+              <div className="py-8 text-center text-sm text-destructive">Failed to load users</div>
+            )}
 
-                return (
-                  <button
-                    key={user.id}
-                    onClick={() => toggleUser(user)}
+            {/* Empty */}
+            {!isFetching && !isError && users.length === 0 && (
+              <div className="py-8 text-center text-muted-foreground text-sm">
+                {debouncedSearch ? translate('users.noResults') : translate('users.empty')}
+              </div>
+            )}
+
+            {/* Users */}
+            {users.map((user) => {
+              const isSelected = selectedUsers.some((u) => u.id === user.id);
+
+              return (
+                <button
+                  key={user.id}
+                  onClick={() => toggleUser(user)}
+                  className={cn(
+                    'w-full flex items-center gap-3 p-2.5 rounded-lg transition-all',
+                    isSelected
+                      ? 'bg-primary/10 border border-primary/20'
+                      : 'hover:bg-muted border border-transparent',
+                  )}
+                >
+                  <div
                     className={cn(
-                      'w-full flex items-center gap-3 p-2.5 rounded-lg transition-all',
-                      isSelected
-                        ? 'bg-primary/10 border border-primary/20'
-                        : 'hover:bg-muted border border-transparent',
+                      'flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white',
+                      getAvatarColor(user.username),
                     )}
                   >
-                    <div
-                      className={cn(
-                        'flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white',
-                        getAvatarColor(user.username),
-                      )}
-                    >
-                      {getInitials(user.username)}
-                    </div>
+                    {getInitials(user.username)}
+                  </div>
 
-                    <div className="flex-1 text-left">
-                      <p className="font-medium text-sm">{user.username}</p>
-                      <p className="text-xs text-muted-foreground">{user.email}</p>
-                    </div>
+                  <div className="flex-1 text-left">
+                    <p className="font-medium text-sm">{user.username}</p>
+                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                  </div>
 
-                    <div
-                      className={cn(
-                        'h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all',
-                        isSelected ? 'bg-primary border-primary' : 'border-muted-foreground/30',
-                      )}
-                    >
-                      {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
-                    </div>
-                  </button>
-                );
-              })
+                  <div
+                    className={cn(
+                      'h-5 w-5 rounded-full border-2 flex items-center justify-center',
+                      isSelected ? 'bg-primary border-primary' : 'border-muted-foreground/30',
+                    )}
+                  >
+                    {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
+                  </div>
+                </button>
+              );
+            })}
+
+            {/* Loader */}
+            {isFetching && (
+              <div className="py-2 text-center text-xs text-muted-foreground">Loading…</div>
             )}
           </div>
 
           {/* Actions */}
           <div className="flex gap-2 pt-2">
-            <Button
-              variant="outline"
-              onClick={handleDialogChange.bind(null, false)}
-              className="flex-1"
-            >
+            <Button variant="outline" onClick={() => handleDialogChange(false)} className="flex-1">
               {translate('action.cancel')}
             </Button>
             <Button
               onClick={handleCreate}
               disabled={!groupName.trim() || selectedUsers.length < 2}
-              className="flex-1 shadow-lg shadow-primary/25"
+              className="flex-1"
             >
               {translate('group.createButton')} ({selectedUsers.length})
             </Button>

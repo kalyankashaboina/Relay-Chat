@@ -1,22 +1,33 @@
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setActiveConversationId } from '@/store/ui/ui.slice';
-import { useTranslate } from '@/hooks/useTranslate';
-import { useGetUsersQuery } from '@/store/users/users.api';
-import { useCreateGroupConversationMutation } from '@/store/chat/conversations.api';
 
-import { Conversation } from '@/types/chat';
+import { useGetUsersQuery } from '@/store/users/users.api';
+import {
+  useGetSidebarConversationsQuery,
+  useSearchSidebarConversationsQuery,
+  useCreateGroupConversationMutation,
+} from '@/store/chat/conversations.api';
+
+import type { Conversation } from '@/types/chat';
 import { cn } from '@/lib/utils';
 
 import { MessageSquare, Users, Search, Plus, Timer } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
 import { CreateGroupModal } from './CreateGroupModal';
+import { StartChatModal } from './StartChatModal';
+
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
 
 import { format, isToday, isYesterday } from 'date-fns';
 import { motion } from 'framer-motion';
-
-import { useGetSidebarConversationsQuery } from '@/store/chat/conversations.api';
+import { useTranslate } from '@/hooks/useTranslate';
 
 /* ---------------------------
    Helpers
@@ -85,7 +96,6 @@ function ConversationItem({
   onClick,
   isOnline,
 }: ConversationItemProps) {
-  console.log('Conversation Item data=>', conversation);
   const displayName = conversation.isGroup
     ? conversation.groupName
     : conversation.user?.username || 'Unknown';
@@ -94,15 +104,6 @@ function ConversationItem({
 
   const lastMessageTime = conversation.lastMessage?.timestamp;
   const isTyping = typingUsers.length > 0;
-
-  let typingText = '';
-  if (typingUsers.length === 1) {
-    typingText = `${typingUsers[0]} is typing…`;
-  } else if (typingUsers.length === 2) {
-    typingText = `${typingUsers[0]}, ${typingUsers[1]} are typing…`;
-  } else if (typingUsers.length > 2) {
-    typingText = `${typingUsers.length} people are typing…`;
-  }
 
   return (
     <button
@@ -149,32 +150,17 @@ function ConversationItem({
       <div className="flex-1 overflow-hidden text-left">
         <div className="flex justify-between items-center">
           <span className="font-medium truncate">{displayName}</span>
-
-          <div className="flex items-center gap-2">
-            {lastMessageTime && (
-              <span className="text-xs text-muted-foreground">{formatTime(lastMessageTime)}</span>
-            )}
-            {conversation.unreadCount > 0 && (
-              <span className="rounded-full bg-primary px-2 text-xs text-white">
-                {conversation.unreadCount}
-              </span>
-            )}
-          </div>
+          {lastMessageTime && (
+            <span className="text-xs text-muted-foreground">{formatTime(lastMessageTime)}</span>
+          )}
         </div>
 
-        <div
-          className={cn('text-sm truncate', isActive ? 'text-primary' : 'text-muted-foreground')}
-        >
-          {isTyping ? (
-            <span className="flex items-center gap-1 text-primary">
-              <TypingDots />
-              {typingText}
-            </span>
-          ) : conversation.isGroup ? (
-            `${memberCount} members`
-          ) : (
-            conversation.lastMessage?.content || 'Start a conversation'
-          )}
+        <div className="text-sm truncate">
+          {isTyping
+            ? 'Typing…'
+            : conversation.isGroup
+              ? `${memberCount} members`
+              : conversation.lastMessage?.content || 'Start a conversation'}
         </div>
       </div>
     </button>
@@ -190,53 +176,39 @@ export function ConversationList() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateGroup, setShowCreateGroup] = useState(false);
-
-  const onlineUserIds = useAppSelector((s) => s.presence.onlineUserIds);
+  const [showStartChat, setShowStartChat] = useState(false);
   const { translate } = useTranslate();
-
-  const { data: users = [], isLoading: usersLoading } = useGetUsersQuery();
-  const [createGroupConversation, { isLoading: creatingGroup }] =
-    useCreateGroupConversationMutation();
-
-  console.log('Users data=>', users);
-  /* ✅ RTK Query – correct usage */
-  const { data: response, isLoading } = useGetSidebarConversationsQuery();
-
-  const conversations = response?.data ?? [];
-
-  console.log('Sidebar data=>', conversations);
+  const onlineUserIds = useAppSelector((s) => s.presence.onlineUserIds);
   const activeConversationId = useAppSelector((state) => state.ui.activeConversationId);
-
   const typingByConversation = useAppSelector((state) => state.typing.byConversation);
 
-  const filtered = conversations.filter((c) => {
-    const name = c.isGroup ? c.groupName : c.user?.username;
-    return name?.toLowerCase().includes(searchQuery.toLowerCase());
+  const { data: usersResponse } = useGetUsersQuery({ limit: 20 });
+  const users = usersResponse?.data ?? [];
+
+  const sidebarListQuery = useGetSidebarConversationsQuery(undefined, {
+    skip: !!searchQuery,
   });
 
+  const sidebarSearchQuery = useSearchSidebarConversationsQuery(
+    { q: searchQuery },
+    {
+      skip: !searchQuery,
+    },
+  );
+
+  const data = searchQuery ? sidebarSearchQuery.data : sidebarListQuery.data;
+
+  const isLoading = searchQuery ? sidebarSearchQuery.isLoading : sidebarListQuery.isLoading;
+
+  const conversations = data?.data ?? [];
+
+  const [createGroupConversation] = useCreateGroupConversationMutation();
+
   const handleCreateGroup = async (name: string, members: { id: string }[]) => {
-    try {
-      const memberIds = members.map((u) => u.id);
-
-      const res = await createGroupConversation({
-        name,
-        memberIds,
-      }).unwrap();
-
-      const conversation = res.data;
-
-      // 1️⃣ Close modal
-      setShowCreateGroup(false);
-
-      // 2️⃣ Open the new group immediately
-      dispatch(setActiveConversationId(conversation.id));
-
-      // 3️⃣ Sidebar will update automatically because:
-      // - cache was updated OR
-      // - Conversations tag was invalidated
-    } catch (err) {
-      console.error('Group creation failed', err);
-    }
+    const memberIds = members.map((m) => m.id);
+    const res = await createGroupConversation({ name, memberIds }).unwrap();
+    dispatch(setActiveConversationId(res.data.id));
+    setShowCreateGroup(false);
   };
 
   return (
@@ -248,16 +220,27 @@ export function ConversationList() {
             <MessageSquare className="h-5 w-5 text-primary" />
             Conversations
           </h2>
-          <button onClick={() => setShowCreateGroup(true)}>
-            <Plus className="h-5 w-5" />
-          </button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button>
+                <Plus className="h-5 w-5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setShowStartChat(true)}>Start Chat</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowCreateGroup(true)}>
+                Create Group
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" />
           <Input
             className="pl-10"
-            placeholder="Search"
+            placeholder="Search conversations"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -265,13 +248,30 @@ export function ConversationList() {
       </div>
 
       {/* List */}
-      <div className="flex-1 overflow-y-auto p-2 space-y-1">
-        {isLoading && (
-          <div className="text-sm text-muted-foreground p-4">Loading conversations…</div>
+      <div className="flex-1 overflow-y-auto p-2">
+        {!isLoading && conversations.length === 0 && !searchQuery && (
+          <div className="h-full flex flex-col items-center justify-center gap-3 text-center text-muted-foreground">
+            <MessageSquare className="h-10 w-10 text-primary/60" />
+            <p className="text-sm">No conversations yet</p>
+            <div className="flex gap-2">
+              <button
+                className="px-4 py-2 rounded-md bg-primary text-white text-sm"
+                onClick={() => setShowStartChat(true)}
+              >
+                Start Chat
+              </button>
+              <button
+                className="px-4 py-2 rounded-md border text-sm"
+                onClick={() => setShowCreateGroup(true)}
+              >
+                Create Group
+              </button>
+            </div>
+          </div>
         )}
 
         {!isLoading &&
-          filtered.map((conversation) => (
+          conversations.map((conversation) => (
             <ConversationItem
               key={conversation.id}
               conversation={conversation}
@@ -280,9 +280,7 @@ export function ConversationList() {
                 !conversation.isGroup && onlineUserIds.includes(conversation.user?.id ?? '')
               }
               typingUsers={typingByConversation[conversation.id] ?? []}
-              onClick={() => {
-                dispatch(setActiveConversationId(conversation.id));
-              }}
+              onClick={() => dispatch(setActiveConversationId(conversation.id))}
             />
           ))}
       </div>
@@ -290,10 +288,11 @@ export function ConversationList() {
       <CreateGroupModal
         open={showCreateGroup}
         onClose={() => setShowCreateGroup(false)}
-        users={users}
         onCreateGroup={handleCreateGroup}
         translate={translate}
       />
+
+      <StartChatModal open={showStartChat} onClose={() => setShowStartChat(false)} />
     </div>
   );
 }
