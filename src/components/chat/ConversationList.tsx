@@ -83,6 +83,7 @@ interface ConversationItemProps {
   conversation: Conversation;
   isActive: boolean;
   isTyping: boolean;
+   isOnline: boolean;
   onClick: () => void;
 }
 
@@ -91,16 +92,13 @@ function ConversationItem({
   isActive,
   isTyping,
   onClick,
+isOnline,
 }: ConversationItemProps) {
   console.log("Conversation Item data=>",conversation)
   const displayName = conversation.isGroup
     ? conversation.groupName
     : conversation.user?.username || "Unknown";
 
-
-  const isOnline = conversation.isGroup
-    ? conversation.users?.some((u) => u.isOnline)
-    : conversation.user?.isOnline;
 
   const memberCount = conversation.isGroup
     ? conversation.users?.length
@@ -113,9 +111,10 @@ function ConversationItem({
       onClick={onClick}
       className={cn(
         "w-full flex items-center gap-3 p-3 rounded-xl transition-all",
-        isActive
-          ? "bg-primary/10 border border-primary/20"
-          : "hover:bg-secondary/80 border border-transparent"
+       isActive
+  ? "bg-primary/10 border border-primary/20 text-primary"
+  : "hover:bg-secondary/80 border border-transparent text-muted-foreground"
+
       )}
     >
       <div className="relative">
@@ -168,7 +167,13 @@ function ConversationItem({
           </div>
         </div>
 
-        <div className="text-sm text-muted-foreground truncate">
+      <div
+  className={cn(
+    "text-sm truncate",
+    isActive ? "text-primary" : "text-muted-foreground"
+  )}
+>
+
           {isTyping ? (
             <span className="flex items-center gap-1 text-primary">
               <TypingDots />
@@ -194,6 +199,8 @@ export function ConversationList() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateGroup, setShowCreateGroup] = useState(false);
+  
+const onlineUserIds = useAppSelector((s) => s.presence.onlineUserIds);
 
   /* ✅ RTK Query – correct usage */
 const {
@@ -252,18 +259,25 @@ const conversations = response?.data ?? [];
           </div>
         )}
 
-        {!isLoading &&
-          filtered.map((conversation) => (
-            <ConversationItem
-              key={conversation.id}
-              conversation={conversation}
-              isActive={conversation.id === activeConversationId}
-              isTyping={Boolean(typingByConversation[conversation.id])}
-              onClick={() =>
-                dispatch(setActiveConversationId(conversation.id))
-              }
-            />
-          ))}
+    {!isLoading &&
+  filtered.map((conversation) => (
+    <ConversationItem
+      key={conversation.id}
+      conversation={conversation}
+      isActive={conversation.id === activeConversationId}
+       isOnline={
+    !conversation.isGroup &&
+    onlineUserIds.includes(conversation.user?.id ?? "")
+  }
+      isTyping={
+        (typingByConversation[conversation.id]?.length ?? 0) > 0
+      }
+      onClick={() =>
+        dispatch(setActiveConversationId(conversation.id))
+      }
+    />
+  ))}
+
       </div>
 
       <CreateGroupModal
