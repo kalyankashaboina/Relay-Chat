@@ -25,6 +25,8 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (isLoading) return; // 🔒 prevent multi-click spam
+
     if (!name || !email || !password || !confirmPassword) {
       toast.error('Please fill in all fields');
       return;
@@ -41,12 +43,16 @@ export default function RegisterPage() {
     }
 
     try {
+      setIsLoading(true);
+
       await dispatch(registerUser(name, email, password));
 
       toast.success('Account created successfully');
       navigate('/login');
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || err?.message || 'Registration failed');
+      toast.error(err?.message || 'Registration failed');
+    } finally {
+      setIsLoading(false);
     }
   };
 
