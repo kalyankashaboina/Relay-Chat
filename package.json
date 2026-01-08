@@ -95,7 +95,7 @@
     "vite": "^5.4.19"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,json,md,css,scss}": [
+    "*.{js,jsx,ts,tsx,json,md,css,scss,html}": [
       "prettier --write",
       "eslint --fix"
     ]
