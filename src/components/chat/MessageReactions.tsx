@@ -36,16 +36,19 @@ export function MessageReactions({
   }
 
   // Group reactions by emoji
-  const groupedReactions = reactions.reduce((acc, r) => {
-    if (!acc[r.emoji]) {
-      acc[r.emoji] = [];
-    }
-    acc[r.emoji].push(r);
-    return acc;
-  }, {} as Record<string, MessageReaction[]>);
+  const groupedReactions = reactions.reduce(
+    (acc, r) => {
+      if (!acc[r.emoji]) {
+        acc[r.emoji] = [];
+      }
+      acc[r.emoji].push(r);
+      return acc;
+    },
+    {} as Record<string, MessageReaction[]>,
+  );
 
   const handleReactionClick = (emoji: string) => {
-    const userReacted = reactions.some(r => r.emoji === emoji && r.odontUserId === currentUserId);
+    const userReacted = reactions.some((r) => r.emoji === emoji && r.odontUserId === currentUserId);
     if (userReacted) {
       onRemoveReaction(emoji);
     } else {
@@ -55,10 +58,15 @@ export function MessageReactions({
   };
 
   return (
-    <div className={cn('flex items-center gap-1 flex-wrap mt-1', isOwn ? 'justify-end' : 'justify-start')}>
+    <div
+      className={cn(
+        'flex items-center gap-1 flex-wrap mt-1',
+        isOwn ? 'justify-end' : 'justify-start',
+      )}
+    >
       {/* Existing reactions */}
       {Object.entries(groupedReactions).map(([emoji, reacts]) => {
-        const userReacted = reacts.some(r => r.odontUserId === currentUserId);
+        const userReacted = reacts.some((r) => r.odontUserId === currentUserId);
         return (
           <button
             key={emoji}
@@ -67,9 +75,9 @@ export function MessageReactions({
               'flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition-all',
               userReacted
                 ? 'bg-primary/20 border border-primary/30'
-                : 'bg-muted/80 hover:bg-muted border border-transparent'
+                : 'bg-muted/80 hover:bg-muted border border-transparent',
             )}
-            title={reacts.map(r => r.userName).join(', ')}
+            title={reacts.map((r) => r.userName).join(', ')}
           >
             <span>{emoji}</span>
             {reacts.length > 1 && (
@@ -90,15 +98,14 @@ export function MessageReactions({
 
         {showPicker && (
           <>
-            <div 
-              className="fixed inset-0 z-40" 
-              onClick={() => setShowPicker(false)} 
-            />
-            <div className={cn(
-              'absolute z-50 flex gap-1 rounded-full bg-card border border-border shadow-xl p-1.5 animate-in fade-in zoom-in-95 duration-200',
-              isOwn ? 'right-0' : 'left-0',
-              'bottom-full mb-2'
-            )}>
+            <div className="fixed inset-0 z-40" onClick={() => setShowPicker(false)} />
+            <div
+              className={cn(
+                'absolute z-50 flex gap-1 rounded-full bg-card border border-border shadow-xl p-1.5 animate-in fade-in zoom-in-95 duration-200',
+                isOwn ? 'right-0' : 'left-0',
+                'bottom-full mb-2',
+              )}
+            >
               {QUICK_REACTIONS.map((emoji) => (
                 <button
                   key={emoji}

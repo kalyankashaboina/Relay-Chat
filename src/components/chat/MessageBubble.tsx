@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { useState } from 'react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import {
   MoreVertical,
   Pencil,
@@ -12,20 +12,17 @@ import {
   CheckCheck,
   RefreshCw,
   Sparkles,
-} from "lucide-react";
+} from 'lucide-react';
 
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { Message } from "@/types/chat";
-import { useTranslate } from "@/hooks/useTranslate";
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { Message } from '@/types/chat';
+import { useTranslate } from '@/hooks/useTranslate';
 
-import {
-  emitDeleteMessage,
-  emitSendMessage,
-} from "@/socket/emitters";
+import { emitDeleteMessage, emitSendMessage } from '@/socket/emitters';
 
-import { MessageStatusIndicator } from "./MessageStatusIndicator";
-import { MarkdownRenderer } from "./MarkdownRenderer";
-import { ReplyPreview } from "./ReplyPreview";
+import { MessageStatusIndicator } from './MessageStatusIndicator';
+import { MarkdownRenderer } from './MarkdownRenderer';
+import { ReplyPreview } from './ReplyPreview';
 
 import {
   DropdownMenu,
@@ -33,7 +30,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 
 interface MessageBubbleProps {
   message: Message;
@@ -46,24 +43,16 @@ export function MessageBubble({ message, onEdit }: MessageBubbleProps) {
 
   /* ---------------- Redux state ---------------- */
 
-  const currentUserId = useAppSelector(
-    (s) => s.auth.user?.id
-  );
+  const currentUserId = useAppSelector((s) => s.auth.user?.id);
 
-  const onlineUserIds = useAppSelector(
-    (s) => s.presence.onlineUserIds
-  );
+  const onlineUserIds = useAppSelector((s) => s.presence.onlineUserIds);
 
-  const activeConversationId = useAppSelector(
-    (s) => s.ui.activeConversationId
-  );
+  const activeConversationId = useAppSelector((s) => s.ui.activeConversationId);
 
   /* ---------------- Derived ---------------- */
 
   const isOwn = message.senderId === currentUserId;
-  const isOnline = currentUserId
-    ? onlineUserIds.includes(currentUserId)
-    : false;
+  const isOnline = currentUserId ? onlineUserIds.includes(currentUserId) : false;
 
   /* ---------------- Local UI state ---------------- */
 
@@ -90,14 +79,9 @@ export function MessageBubble({ message, onEdit }: MessageBubbleProps) {
 
   if (message.isDeleted) {
     return (
-      <div
-        className={cn(
-          "flex w-full",
-          isOwn ? "justify-end" : "justify-start"
-        )}
-      >
+      <div className={cn('flex w-full', isOwn ? 'justify-end' : 'justify-start')}>
         <div className="rounded-2xl border border-dashed px-4 py-2 text-sm italic text-muted-foreground">
-          {t("message.deleted")}
+          {t('message.deleted')}
         </div>
       </div>
     );
@@ -106,23 +90,16 @@ export function MessageBubble({ message, onEdit }: MessageBubbleProps) {
   /* ---------------- Render ---------------- */
 
   return (
-    <div
-      className={cn(
-        "group flex w-full",
-        isOwn ? "justify-end" : "justify-start"
-      )}
-    >
+    <div className={cn('group flex w-full', isOwn ? 'justify-end' : 'justify-start')}>
       <div className="max-w-[75%] space-y-1">
         <div className="relative">
           <div
             className={cn(
-              "rounded-2xl px-4 py-2.5 shadow-sm",
+              'rounded-2xl px-4 py-2.5 shadow-sm',
               isOwn
-                ? "rounded-br-md bg-primary text-primary-foreground"
-                : "rounded-bl-md bg-card border border-border",
-              message.status === "failed" &&
-                isOwn &&
-                "ring-2 ring-destructive/50"
+                ? 'rounded-br-md bg-primary text-primary-foreground'
+                : 'rounded-bl-md bg-card border border-border',
+              message.status === 'failed' && isOwn && 'ring-2 ring-destructive/50',
             )}
           >
             {message.isAI && (
@@ -132,42 +109,30 @@ export function MessageBubble({ message, onEdit }: MessageBubbleProps) {
               </div>
             )}
 
-          {message.replyTo && (
-  <ReplyPreview
-    replyTo={message.replyTo}
-    isInMessage
-    onCancel={() => {}}
-  />
-)}
-
+            {message.replyTo && (
+              <ReplyPreview replyTo={message.replyTo} isInMessage onCancel={() => {}} />
+            )}
 
             {message.isVanish && (
               <div className="mb-1 flex items-center gap-1 text-xs opacity-70">
                 <Timer className="h-3 w-3" />
-                <span>{t("vanish.willDisappear")}</span>
+                <span>{t('vanish.willDisappear')}</span>
               </div>
             )}
 
-            {message.content && (
-              message.content.includes("**") ||
-              message.content.includes("```") ? (
-                <MarkdownRenderer
-                  content={message.content}
-                  isOwn={isOwn}
-                />
+            {message.content &&
+              (message.content.includes('**') || message.content.includes('```') ? (
+                <MarkdownRenderer content={message.content} isOwn={isOwn} />
               ) : (
-                <p className="text-sm whitespace-pre-wrap break-words">
-                  {message.content}
-                </p>
-              )
-            )}
+                <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+              ))}
           </div>
 
           {/* Actions */}
           <div
             className={cn(
-              "absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100",
-              isOwn ? "right-full mr-2" : "left-full ml-2"
+              'absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100',
+              isOwn ? 'right-full mr-2' : 'left-full ml-2',
             )}
           >
             {isOwn && (
@@ -180,7 +145,7 @@ export function MessageBubble({ message, onEdit }: MessageBubbleProps) {
                 <DropdownMenuContent>
                   <DropdownMenuItem onClick={() => onEdit?.(message)}>
                     <Pencil className="mr-2 h-4 w-4" />
-                    {t("action.edit")}
+                    {t('action.edit')}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -188,7 +153,7 @@ export function MessageBubble({ message, onEdit }: MessageBubbleProps) {
                     onClick={() => setShowDeleteDialog(true)}
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
-                    {t("action.delete")}
+                    {t('action.delete')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -198,30 +163,22 @@ export function MessageBubble({ message, onEdit }: MessageBubbleProps) {
 
         {/* Footer */}
         <div
-          className={cn(
-            "flex items-center gap-2 text-xs",
-            isOwn ? "justify-end" : "justify-start"
-          )}
+          className={cn('flex items-center gap-2 text-xs', isOwn ? 'justify-end' : 'justify-start')}
         >
           <span className="text-muted-foreground">
-            {format(new Date(message.timestamp), "HH:mm")}
+            {format(new Date(message.timestamp), 'HH:mm')}
           </span>
 
-          {isOwn && (
-            <MessageStatusIndicator
-              status={message.status}
-              translate={t}
-            />
-          )}
+          {isOwn && <MessageStatusIndicator status={message.status} translate={t} />}
 
-          {isOwn && message.status === "failed" && (
+          {isOwn && message.status === 'failed' && (
             <button
               onClick={handleRetry}
               disabled={!isOnline}
               className="flex items-center gap-1 text-destructive"
             >
               <RefreshCw className="h-3 w-3" />
-              {t("action.retry")}
+              {t('action.retry')}
             </button>
           )}
         </div>

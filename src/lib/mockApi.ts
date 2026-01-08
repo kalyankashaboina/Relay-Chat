@@ -34,7 +34,7 @@ export interface UploadFileResult {
 export function mockSendMessage(message: Message): Promise<SendMessageResult> {
   return new Promise((resolve) => {
     const delay = randomDelay(CONFIG.messageDelay.min, CONFIG.messageDelay.max);
-    
+
     setTimeout(() => {
       if (shouldFail()) {
         resolve({
@@ -57,7 +57,7 @@ export function mockSendMessage(message: Message): Promise<SendMessageResult> {
 // Simulate file upload with progress
 export function mockUploadFile(
   file: FileAttachment,
-  onProgress: (progress: number) => void
+  onProgress: (progress: number) => void,
 ): Promise<UploadFileResult> {
   return new Promise((resolve) => {
     const totalDuration = randomDelay(CONFIG.uploadDelay.min, CONFIG.uploadDelay.max);
@@ -71,7 +71,7 @@ export function mockUploadFile(
 
       if (currentStep >= steps) {
         clearInterval(interval);
-        
+
         // Final delay before completion
         setTimeout(() => {
           if (shouldFail()) {
@@ -99,19 +99,19 @@ export function mockUploadFile(
 // Simulate receiving a reply message
 export function mockReceiveReply(originalMessage: string): Promise<Message> {
   const replies = [
-    "Got it! Thanks for the message.",
-    "Interesting, tell me more!",
+    'Got it! Thanks for the message.',
+    'Interesting, tell me more!',
     "I'll get back to you on that.",
-    "👍 Sounds good!",
-    "Let me think about it...",
+    '👍 Sounds good!',
+    'Let me think about it...',
     "That's a great point!",
-    "I agree completely.",
-    "Hmm, not sure about that.",
+    'I agree completely.',
+    'Hmm, not sure about that.',
   ];
 
   return new Promise((resolve) => {
     const delay = randomDelay(1000, 3000);
-    
+
     setTimeout(() => {
       resolve({
         id: `msg-${Date.now()}-reply`,
@@ -138,7 +138,11 @@ const ALLOWED_TYPES: Record<string, string[]> = {
   image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
   video: ['video/mp4', 'video/webm', 'video/quicktime'],
   audio: ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/webm'],
-  document: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+  document: [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ],
   text: ['text/plain', 'text/markdown', 'text/csv'],
 };
 

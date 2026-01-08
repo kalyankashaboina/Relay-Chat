@@ -93,7 +93,7 @@ export function CallOverlay({
                 className={cn(
                   'flex h-32 w-32 items-center justify-center rounded-full text-4xl font-bold',
                   isConnecting && 'animate-pulse',
-                  'bg-primary text-primary-foreground'
+                  'bg-primary text-primary-foreground',
                 )}
               >
                 {callState.remoteUser ? getInitials(callState.remoteUser.name) : '?'}
@@ -120,9 +120,7 @@ export function CallOverlay({
               {callState.remoteUser?.name || 'Unknown'}
             </span>
             {isConnected && (
-              <span className="text-sm text-green-400">
-                {formatDuration(callState.duration)}
-              </span>
+              <span className="text-sm text-green-400">{formatDuration(callState.duration)}</span>
             )}
           </div>
 
@@ -156,7 +154,7 @@ export function CallOverlay({
             className={cn(
               'flex h-32 w-32 items-center justify-center rounded-full text-4xl font-bold transition-all duration-500',
               isConnecting && 'animate-pulse',
-              'bg-primary text-primary-foreground'
+              'bg-primary text-primary-foreground',
             )}
           >
             {callState.remoteUser ? getInitials(callState.remoteUser.name) : '?'}
@@ -223,15 +221,11 @@ export function CallOverlay({
           size="lg"
           className={cn(
             'h-14 w-14 rounded-full transition-all',
-            callState.isMuted && 'bg-destructive/20 text-destructive hover:bg-destructive/30'
+            callState.isMuted && 'bg-destructive/20 text-destructive hover:bg-destructive/30',
           )}
           onClick={onToggleMute}
         >
-          {callState.isMuted ? (
-            <MicOff className="h-6 w-6" />
-          ) : (
-            <Mic className="h-6 w-6" />
-          )}
+          {callState.isMuted ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
         </Button>
 
         {/* Video toggle (for video calls) */}
@@ -241,7 +235,7 @@ export function CallOverlay({
             size="lg"
             className={cn(
               'h-14 w-14 rounded-full transition-all',
-              callState.isVideoOff && 'bg-destructive/20 text-destructive hover:bg-destructive/30'
+              callState.isVideoOff && 'bg-destructive/20 text-destructive hover:bg-destructive/30',
             )}
             onClick={onToggleVideo}
           >
@@ -294,7 +288,7 @@ export function useCall(translate: (key: string) => string) {
   useEffect(() => {
     return () => {
       if (localStreamRef.current) {
-        localStreamRef.current.getTracks().forEach(track => track.stop());
+        localStreamRef.current.getTracks().forEach((track) => track.stop());
       }
     };
   }, []);
@@ -310,9 +304,10 @@ export function useCall(translate: (key: string) => string) {
       return stream;
     } catch (error: any) {
       if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-        toast.error(type === 'video' 
-          ? translate('error.cameraPermission')
-          : translate('error.microphonePermission')
+        toast.error(
+          type === 'video'
+            ? translate('error.cameraPermission')
+            : translate('error.microphonePermission'),
         );
       } else {
         toast.error(translate('error.generic'));
@@ -322,47 +317,53 @@ export function useCall(translate: (key: string) => string) {
     }
   };
 
-  const initiateCall = useCallback(async (type: CallType, remoteUser: User) => {
-    // Request media access
-    const stream = await requestMediaAccess(type);
-    
-    if (!stream) {
-      return; // Permission denied or error
-    }
+  const initiateCall = useCallback(
+    async (type: CallType, remoteUser: User) => {
+      // Request media access
+      const stream = await requestMediaAccess(type);
 
-    localStreamRef.current = stream;
-
-    setCallState({
-      type,
-      status: 'calling',
-      isMuted: false,
-      isVideoOff: false,
-      duration: 0,
-      remoteUser,
-      localStream: stream,
-    });
-
-    // Simulate ringing
-    setTimeout(() => {
-      setCallState((prev) => ({ ...prev, status: 'connecting' }));
-    }, 1500);
-
-    // Simulate connection after delay
-    setTimeout(() => {
-      // 90% success rate
-      if (Math.random() > 0.1) {
-        setCallState((prev) => ({ ...prev, status: 'connected' }));
-      } else {
-        toast.error('Call failed. Please try again.');
-        endCallInternal();
+      if (!stream) {
+        return; // Permission denied or error
       }
-    }, 3000 + Math.random() * 1000);
-  }, [translate]);
+
+      localStreamRef.current = stream;
+
+      setCallState({
+        type,
+        status: 'calling',
+        isMuted: false,
+        isVideoOff: false,
+        duration: 0,
+        remoteUser,
+        localStream: stream,
+      });
+
+      // Simulate ringing
+      setTimeout(() => {
+        setCallState((prev) => ({ ...prev, status: 'connecting' }));
+      }, 1500);
+
+      // Simulate connection after delay
+      setTimeout(
+        () => {
+          // 90% success rate
+          if (Math.random() > 0.1) {
+            setCallState((prev) => ({ ...prev, status: 'connected' }));
+          } else {
+            toast.error('Call failed. Please try again.');
+            endCallInternal();
+          }
+        },
+        3000 + Math.random() * 1000,
+      );
+    },
+    [translate],
+  );
 
   const endCallInternal = useCallback(() => {
     // Stop all tracks
     if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach(track => track.stop());
+      localStreamRef.current.getTracks().forEach((track) => track.stop());
       localStreamRef.current = null;
     }
 
@@ -393,7 +394,7 @@ export function useCall(translate: (key: string) => string) {
   const toggleMute = useCallback(() => {
     if (localStreamRef.current) {
       const audioTracks = localStreamRef.current.getAudioTracks();
-      audioTracks.forEach(track => {
+      audioTracks.forEach((track) => {
         track.enabled = !track.enabled;
       });
     }
@@ -403,7 +404,7 @@ export function useCall(translate: (key: string) => string) {
   const toggleVideo = useCallback(() => {
     if (localStreamRef.current) {
       const videoTracks = localStreamRef.current.getVideoTracks();
-      videoTracks.forEach(track => {
+      videoTracks.forEach((track) => {
         track.enabled = !track.enabled;
       });
     }

@@ -1,18 +1,18 @@
-import { useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from '@/components/ui/toaster';
+import { Toaster as Sonner } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { checkAuth } from "@/store/auth/auth.thunks";
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { checkAuth } from '@/store/auth/auth.thunks';
 
-import Index from "@/pages/Index";
-import LoginPage from "@/pages/LoginPage";
-import RegisterPage from "@/pages/RegisterPage";
-import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
-import NotFound from "@/pages/NotFound";
+import Index from '@/pages/Index';
+import LoginPage from '@/pages/LoginPage';
+import RegisterPage from '@/pages/RegisterPage';
+import ForgotPasswordPage from '@/pages/ForgotPasswordPage';
+import NotFound from '@/pages/NotFound';
 
 /* =========================
    ROUTE GUARDS
@@ -86,18 +86,14 @@ export default function App() {
 
   // Run once on app boot (refresh-safe login)
   useEffect(() => {
-    if (status === "idle") {
+    if (status === 'idle') {
       dispatch(checkAuth());
     }
   }, [status, dispatch]);
 
   // Global auth bootstrap loading
-  if (status === "idle" || status === "loading") {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        Loading...
-      </div>
-    );
+  if (status === 'idle' || status === 'loading') {
+    return <div className="flex h-screen items-center justify-center">Loading...</div>;
   }
 
   return (

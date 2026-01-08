@@ -1,12 +1,7 @@
 import { MessageStatus } from '@/types/chat';
 import { cn } from '@/lib/utils';
 import { Check, CheckCheck, Clock, AlertCircle, Loader2 } from 'lucide-react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface MessageStatusIndicatorProps {
   status: MessageStatus;
@@ -14,7 +9,10 @@ interface MessageStatusIndicatorProps {
 }
 
 export function MessageStatusIndicator({ status, translate }: MessageStatusIndicatorProps) {
-  const config: Record<MessageStatus, { icon: typeof Check; color: string; animate: boolean; tooltip: string }> = {
+  const config: Record<
+    MessageStatus,
+    { icon: typeof Check; color: string; animate: boolean; tooltip: string }
+  > = {
     pending: {
       icon: Loader2,
       color: 'text-muted-foreground',

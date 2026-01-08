@@ -10,7 +10,12 @@ interface CallHistoryProps {
 }
 
 function getInitials(name: string): string {
-  return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function getAvatarColor(name: string): string {
@@ -52,18 +57,21 @@ export function CallHistory({ calls, onCallBack, translate }: CallHistoryProps) 
     <div className="flex flex-col h-full bg-sidebar">
       <div className="flex items-center gap-2 border-b border-sidebar-border p-4">
         <Phone className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold text-sidebar-foreground">{translate('call.history')}</h2>
+        <h2 className="text-lg font-semibold text-sidebar-foreground">
+          {translate('call.history')}
+        </h2>
       </div>
-      
+
       <div className="flex-1 overflow-y-auto">
         {calls.map((call) => {
           const CallIcon = call.type === 'video' ? Video : Phone;
-          const DirectionIcon = call.status === 'missed' 
-            ? PhoneMissed 
-            : call.isOutgoing 
-              ? PhoneOutgoing 
-              : PhoneIncoming;
-          
+          const DirectionIcon =
+            call.status === 'missed'
+              ? PhoneMissed
+              : call.isOutgoing
+                ? PhoneOutgoing
+                : PhoneIncoming;
+
           return (
             <div
               key={call.id}
@@ -72,10 +80,12 @@ export function CallHistory({ calls, onCallBack, translate }: CallHistoryProps) 
             >
               {/* Avatar */}
               <div className="relative">
-                <div className={cn(
-                  'flex h-12 w-12 items-center justify-center rounded-full text-sm font-semibold text-white',
-                  getAvatarColor(call.user.name)
-                )}>
+                <div
+                  className={cn(
+                    'flex h-12 w-12 items-center justify-center rounded-full text-sm font-semibold text-white',
+                    getAvatarColor(call.user.name),
+                  )}
+                >
                   {getInitials(call.user.name)}
                 </div>
               </div>
@@ -84,14 +94,18 @@ export function CallHistory({ calls, onCallBack, translate }: CallHistoryProps) 
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-foreground truncate">{call.user.name}</p>
                 <div className="flex items-center gap-1.5 text-sm">
-                  <DirectionIcon className={cn(
-                    'h-3.5 w-3.5',
-                    call.status === 'missed' ? 'text-destructive' : 'text-muted-foreground'
-                  )} />
-                  <span className={cn(
-                    call.status === 'missed' ? 'text-destructive' : 'text-muted-foreground'
-                  )}>
-                    {call.status === 'completed' && call.duration > 0 
+                  <DirectionIcon
+                    className={cn(
+                      'h-3.5 w-3.5',
+                      call.status === 'missed' ? 'text-destructive' : 'text-muted-foreground',
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      call.status === 'missed' ? 'text-destructive' : 'text-muted-foreground',
+                    )}
+                  >
+                    {call.status === 'completed' && call.duration > 0
                       ? formatDuration(call.duration)
                       : translate(`call.${call.status}`)}
                   </span>

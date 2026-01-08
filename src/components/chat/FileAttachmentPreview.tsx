@@ -45,7 +45,7 @@ export function FileAttachmentPreview({
       className={cn(
         'rounded-lg p-3 transition-all duration-200',
         isOwn ? 'bg-message-own/30' : 'bg-secondary/50',
-        attachment.uploadStatus === 'failed' && 'ring-1 ring-destructive/50'
+        attachment.uploadStatus === 'failed' && 'ring-1 ring-destructive/50',
       )}
     >
       {/* Image preview */}
@@ -56,7 +56,7 @@ export function FileAttachmentPreview({
             alt={attachment.name}
             className={cn(
               'max-h-48 w-full object-cover transition-opacity duration-200',
-              attachment.uploadStatus === 'pending' && 'opacity-50'
+              attachment.uploadStatus === 'pending' && 'opacity-50',
             )}
           />
           {attachment.uploadStatus === 'pending' && attachment.uploadProgress > 0 && (
@@ -77,7 +77,7 @@ export function FileAttachmentPreview({
         <div
           className={cn(
             'flex h-10 w-10 items-center justify-center rounded-lg',
-            isOwn ? 'bg-message-own/50' : 'bg-secondary'
+            isOwn ? 'bg-message-own/50' : 'bg-secondary',
           )}
         >
           <Icon className="h-5 w-5" />

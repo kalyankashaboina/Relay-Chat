@@ -24,7 +24,7 @@ export function ThemeToggle() {
 
   const applyTheme = (newTheme: Theme) => {
     const root = document.documentElement;
-    
+
     if (newTheme === 'system') {
       const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       root.classList.toggle('light', !systemDark);
@@ -45,7 +45,7 @@ export function ThemeToggle() {
     { value: 'system' as const, label: 'System', icon: Monitor },
   ];
 
-  const CurrentIcon = themes.find(t => t.value === theme)?.icon || Moon;
+  const CurrentIcon = themes.find((t) => t.value === theme)?.icon || Moon;
 
   return (
     <DropdownMenu>

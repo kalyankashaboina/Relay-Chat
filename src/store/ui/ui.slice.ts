@@ -1,6 +1,6 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-export type ChatTab = "chats" | "calls" | "users";
+export type ChatTab = 'chats' | 'calls' | 'users';
 
 interface UIState {
   showConversationList: boolean;
@@ -10,12 +10,12 @@ interface UIState {
 
 const initialState: UIState = {
   showConversationList: true,
-  activeTab: "chats",
+  activeTab: 'chats',
   activeConversationId: null,
 };
 
 const uiSlice = createSlice({
-  name: "ui",
+  name: 'ui',
   initialState,
   reducers: {
     /* Sidebar */
@@ -32,10 +32,7 @@ const uiSlice = createSlice({
     },
 
     /* Conversations */
-    setActiveConversationId(
-      state,
-      action: PayloadAction<string | null>
-    ) {
+    setActiveConversationId(state, action: PayloadAction<string | null>) {
       state.activeConversationId = action.payload;
 
       // Mobile UX: hide sidebar when opening chat
@@ -51,12 +48,7 @@ const uiSlice = createSlice({
   },
 });
 
-export const {
-  showSidebar,
-  hideSidebar,
-  setActiveTab,
-  setActiveConversationId,
-  resetUI,
-} = uiSlice.actions;
+export const { showSidebar, hideSidebar, setActiveTab, setActiveConversationId, resetUI } =
+  uiSlice.actions;
 
 export default uiSlice.reducer;

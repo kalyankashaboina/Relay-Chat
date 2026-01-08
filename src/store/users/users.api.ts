@@ -1,5 +1,5 @@
-import { api } from "@/store/api";
-import type { User } from "@/types/chat";
+import { api } from '@/store/api';
+import type { User } from '@/types/chat';
 
 interface UsersResponse {
   data: User[];
@@ -8,9 +8,9 @@ interface UsersResponse {
 export const usersApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getUsers: builder.query<User[], void>({
-      query: () => "/api/users",
+      query: () => '/api/users',
       transformResponse: (response: UsersResponse) => response.data,
-      providesTags: ["Users"],
+      providesTags: ['Users'],
     }),
   }),
   overrideExisting: false,

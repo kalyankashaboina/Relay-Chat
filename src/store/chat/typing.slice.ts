@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface TypingState {
   byConversation: Record<string, string[]>; // conversationId → userIds[]
@@ -9,13 +9,10 @@ const initialState: TypingState = {
 };
 
 const typingSlice = createSlice({
-  name: "typing",
+  name: 'typing',
   initialState,
   reducers: {
-    typingStarted(
-      state,
-      action: PayloadAction<{ conversationId: string; userId: string }>
-    ) {
+    typingStarted(state, action: PayloadAction<{ conversationId: string; userId: string }>) {
       const { conversationId, userId } = action.payload;
 
       if (!state.byConversation[conversationId]) {
@@ -27,23 +24,15 @@ const typingSlice = createSlice({
       }
     },
 
-    typingStopped(
-      state,
-      action: PayloadAction<{ conversationId: string; userId: string }>
-    ) {
+    typingStopped(state, action: PayloadAction<{ conversationId: string; userId: string }>) {
       const { conversationId, userId } = action.payload;
       const users = state.byConversation[conversationId];
       if (!users) return;
 
-      state.byConversation[conversationId] = users.filter(
-        (id) => id !== userId
-      );
+      state.byConversation[conversationId] = users.filter((id) => id !== userId);
     },
 
-    clearTypingForConversation(
-      state,
-      action: PayloadAction<{ conversationId: string }>
-    ) {
+    clearTypingForConversation(state, action: PayloadAction<{ conversationId: string }>) {
       delete state.byConversation[action.payload.conversationId];
     },
 
@@ -53,11 +42,7 @@ const typingSlice = createSlice({
   },
 });
 
-export const {
-  typingStarted,
-  typingStopped,
-  clearTypingForConversation,
-  resetTyping,
-} = typingSlice.actions;
+export const { typingStarted, typingStopped, clearTypingForConversation, resetTyping } =
+  typingSlice.actions;
 
 export default typingSlice.reducer;

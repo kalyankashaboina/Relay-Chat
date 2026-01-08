@@ -20,7 +20,7 @@ export function LanguageSelector() {
               'rounded-md px-3 py-1 text-xs font-medium transition-all duration-200',
               language === lang.code
                 ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
+                : 'text-muted-foreground hover:text-foreground',
             )}
           >
             {lang.name}

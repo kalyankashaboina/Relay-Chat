@@ -8,7 +8,11 @@ interface AuthContextType {
   isLoading: boolean;
   language: Language;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+  ) => Promise<{ success: boolean; error?: string }>;
   forgotPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   setLanguage: (lang: Language) => void;

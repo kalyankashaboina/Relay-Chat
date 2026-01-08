@@ -2,18 +2,18 @@ import { useState } from 'react';
 import { Conversation, Message } from '@/types/chat';
 import { cn } from '@/lib/utils';
 import { Forward, Users, Search, Check } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 function getInitials(name: string): string {
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function getAvatarColor(name: string): string {
@@ -30,18 +30,18 @@ interface ForwardMessageModalProps {
   translate: (key: string) => string;
 }
 
-export function ForwardMessageModal({ 
-  open, 
-  onClose, 
-  message, 
-  conversations, 
+export function ForwardMessageModal({
+  open,
+  onClose,
+  message,
+  conversations,
   onForward,
-  translate 
+  translate,
 }: ForwardMessageModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
 
-  const filteredConversations = conversations.filter(conv => {
+  const filteredConversations = conversations.filter((conv) => {
     const name = conv.isGroup ? conv.groupName : conv.user?.name;
     return name?.toLowerCase().includes(searchQuery.toLowerCase());
   });
@@ -104,9 +104,9 @@ export function ForwardMessageModal({
                   onClick={() => setSelectedConversation(conv.id)}
                   className={cn(
                     'w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-200',
-                    isSelected 
-                      ? 'bg-primary/10 border border-primary/30 ring-1 ring-primary/20' 
-                      : 'hover:bg-secondary border border-transparent'
+                    isSelected
+                      ? 'bg-primary/10 border border-primary/30 ring-1 ring-primary/20'
+                      : 'hover:bg-secondary border border-transparent',
                   )}
                 >
                   <div className="relative">
@@ -115,10 +115,12 @@ export function ForwardMessageModal({
                         <Users className="h-4 w-4" />
                       </div>
                     ) : (
-                      <div className={cn(
-                        'flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white',
-                        getAvatarColor(displayName)
-                      )}>
+                      <div
+                        className={cn(
+                          'flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white',
+                          getAvatarColor(displayName),
+                        )}
+                      >
                         {getInitials(displayName)}
                       </div>
                     )}
@@ -140,11 +142,7 @@ export function ForwardMessageModal({
           <Button variant="outline" onClick={handleClose}>
             {translate('action.cancel')}
           </Button>
-          <Button 
-            onClick={handleForward} 
-            disabled={!selectedConversation}
-            className="gap-2"
-          >
+          <Button onClick={handleForward} disabled={!selectedConversation} className="gap-2">
             <Forward className="h-4 w-4" />
             {translate('action.forward')}
           </Button>

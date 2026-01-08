@@ -1,11 +1,6 @@
 import { useState } from 'react';
 import { Clock, Calendar, Send } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,11 +13,11 @@ interface ScheduleMessageModalProps {
   translate: (key: string) => string;
 }
 
-export function ScheduleMessageModal({ 
-  open, 
-  onClose, 
+export function ScheduleMessageModal({
+  open,
+  onClose,
   onSchedule,
-  translate 
+  translate,
 }: ScheduleMessageModalProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [customDate, setCustomDate] = useState('');
@@ -144,8 +139,7 @@ export function ScheduleMessageModal({
             <div className="flex items-center gap-2 text-sm">
               <Clock className="h-4 w-4 text-primary" />
               <span>
-                Message will be sent on{' '}
-                <strong>{format(selectedDate, 'EEEE, MMMM d')}</strong> at{' '}
+                Message will be sent on <strong>{format(selectedDate, 'EEEE, MMMM d')}</strong> at{' '}
                 <strong>{format(selectedDate, 'h:mm a')}</strong>
               </span>
             </div>
@@ -157,8 +151,8 @@ export function ScheduleMessageModal({
           <Button variant="outline" onClick={handleClose}>
             {translate('action.cancel')}
           </Button>
-          <Button 
-            onClick={handleSchedule} 
+          <Button
+            onClick={handleSchedule}
             disabled={!selectedDate || isBefore(selectedDate, new Date())}
             className="gap-2"
           >

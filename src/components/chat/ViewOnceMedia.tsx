@@ -2,10 +2,7 @@ import { useState, useEffect } from 'react';
 import { FileAttachment } from '@/types/chat';
 import { cn } from '@/lib/utils';
 import { Eye, EyeOff, Lock, Image as ImageIcon, Video, Play } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 interface ViewOnceMediaProps {
   attachment: FileAttachment;
@@ -21,7 +18,7 @@ export function ViewOnceMedia({ attachment, onView, isOwn, translate }: ViewOnce
 
   useEffect(() => {
     if (isOpened && countdown > 0) {
-      const timer = setTimeout(() => setCountdown(c => c - 1), 1000);
+      const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
       return () => clearTimeout(timer);
     } else if (isOpened && countdown === 0) {
       setIsOpened(false);
@@ -84,7 +81,7 @@ export function ViewOnceMedia({ attachment, onView, isOwn, translate }: ViewOnce
           'flex items-center gap-3 rounded-xl p-4 transition-all',
           'bg-gradient-to-br from-primary/20 to-primary/5',
           'border border-primary/20 hover:border-primary/40',
-          'group'
+          'group',
         )}
       >
         <div className="relative">

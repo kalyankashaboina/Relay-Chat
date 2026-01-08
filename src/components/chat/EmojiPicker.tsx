@@ -8,10 +8,141 @@ interface EmojiPickerProps {
 }
 
 const EMOJI_CATEGORIES = {
-  smileys: ['😀', '😁', '😂', '🤣', '😃', '😄', '😅', '😆', '😉', '😊', '😋', '😎', '😍', '🥰', '😘', '😗', '😙', '😚', '🙂', '🤗', '🤩', '🤔', '🤨', '😐', '😑', '😶', '🙄', '😏', '😣', '😥', '😮', '🤐', '😯', '😪', '😫', '🥱', '😴', '😌', '😛', '😜', '😝', '🤤', '😒', '😓', '😔', '😕', '🙃', '🤑', '😲'],
-  gestures: ['👍', '👎', '👌', '🤌', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '👇', '☝️', '👋', '🤚', '🖐️', '✋', '🖖', '👏', '🙌', '👐', '🤲', '🤝', '🙏', '✍️', '💪', '🦾', '🦿'],
-  hearts: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟'],
-  objects: ['🎉', '🎊', '🎈', '🎁', '🏆', '⭐', '✨', '💡', '🔥', '💯', '✅', '❌', '⚠️', '📌', '📍', '💬', '💭', '🗯️', '📱', '💻', '⌨️', '🖥️', '📷', '📹', '🎵', '🎶', '🎤', '🎧', '📞', '📧'],
+  smileys: [
+    '😀',
+    '😁',
+    '😂',
+    '🤣',
+    '😃',
+    '😄',
+    '😅',
+    '😆',
+    '😉',
+    '😊',
+    '😋',
+    '😎',
+    '😍',
+    '🥰',
+    '😘',
+    '😗',
+    '😙',
+    '😚',
+    '🙂',
+    '🤗',
+    '🤩',
+    '🤔',
+    '🤨',
+    '😐',
+    '😑',
+    '😶',
+    '🙄',
+    '😏',
+    '😣',
+    '😥',
+    '😮',
+    '🤐',
+    '😯',
+    '😪',
+    '😫',
+    '🥱',
+    '😴',
+    '😌',
+    '😛',
+    '😜',
+    '😝',
+    '🤤',
+    '😒',
+    '😓',
+    '😔',
+    '😕',
+    '🙃',
+    '🤑',
+    '😲',
+  ],
+  gestures: [
+    '👍',
+    '👎',
+    '👌',
+    '🤌',
+    '✌️',
+    '🤞',
+    '🤟',
+    '🤘',
+    '🤙',
+    '👈',
+    '👉',
+    '👆',
+    '👇',
+    '☝️',
+    '👋',
+    '🤚',
+    '🖐️',
+    '✋',
+    '🖖',
+    '👏',
+    '🙌',
+    '👐',
+    '🤲',
+    '🤝',
+    '🙏',
+    '✍️',
+    '💪',
+    '🦾',
+    '🦿',
+  ],
+  hearts: [
+    '❤️',
+    '🧡',
+    '💛',
+    '💚',
+    '💙',
+    '💜',
+    '🖤',
+    '🤍',
+    '🤎',
+    '💔',
+    '❣️',
+    '💕',
+    '💞',
+    '💓',
+    '💗',
+    '💖',
+    '💘',
+    '💝',
+    '💟',
+  ],
+  objects: [
+    '🎉',
+    '🎊',
+    '🎈',
+    '🎁',
+    '🏆',
+    '⭐',
+    '✨',
+    '💡',
+    '🔥',
+    '💯',
+    '✅',
+    '❌',
+    '⚠️',
+    '📌',
+    '📍',
+    '💬',
+    '💭',
+    '🗯️',
+    '📱',
+    '💻',
+    '⌨️',
+    '🖥️',
+    '📷',
+    '📹',
+    '🎵',
+    '🎶',
+    '🎤',
+    '🎧',
+    '📞',
+    '📧',
+  ],
 };
 
 export function EmojiPicker({ onEmojiSelect, className }: EmojiPickerProps) {
@@ -56,21 +187,23 @@ export function EmojiPicker({ onEmojiSelect, className }: EmojiPickerProps) {
         <div className="absolute bottom-12 left-0 z-50 w-72 rounded-xl border border-border bg-card shadow-xl animate-fade-in">
           {/* Category tabs */}
           <div className="flex border-b border-border p-1">
-            {(Object.keys(EMOJI_CATEGORIES) as Array<keyof typeof EMOJI_CATEGORIES>).map((category) => (
-              <button
-                key={category}
-                type="button"
-                onClick={() => setActiveCategory(category)}
-                className={cn(
-                  'flex-1 rounded-lg p-2 text-lg transition-colors',
-                  activeCategory === category
-                    ? 'bg-primary/10 text-foreground'
-                    : 'text-muted-foreground hover:bg-muted'
-                )}
-              >
-                {categoryIcons[category]}
-              </button>
-            ))}
+            {(Object.keys(EMOJI_CATEGORIES) as Array<keyof typeof EMOJI_CATEGORIES>).map(
+              (category) => (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => setActiveCategory(category)}
+                  className={cn(
+                    'flex-1 rounded-lg p-2 text-lg transition-colors',
+                    activeCategory === category
+                      ? 'bg-primary/10 text-foreground'
+                      : 'text-muted-foreground hover:bg-muted',
+                  )}
+                >
+                  {categoryIcons[category]}
+                </button>
+              ),
+            )}
           </div>
 
           {/* Emoji grid */}

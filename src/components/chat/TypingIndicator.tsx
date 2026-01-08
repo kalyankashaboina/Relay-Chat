@@ -8,14 +8,20 @@ interface TypingIndicatorProps {
   showInline?: boolean;
 }
 
-export function TypingIndicator({ userNames, className, translate, showInline = false }: TypingIndicatorProps) {
+export function TypingIndicator({
+  userNames,
+  className,
+  translate,
+  showInline = false,
+}: TypingIndicatorProps) {
   if (userNames.length === 0) return null;
 
-  const displayText = userNames.length === 1
-    ? `${userNames[0]} ${translate('typing.indicator')}`
-    : userNames.length === 2
-    ? `${userNames[0]} and ${userNames[1]} ${translate('typing.multiple')}`
-    : `${userNames[0]} and ${userNames.length - 1} others ${translate('typing.multiple')}`;
+  const displayText =
+    userNames.length === 1
+      ? `${userNames[0]} ${translate('typing.indicator')}`
+      : userNames.length === 2
+        ? `${userNames[0]} and ${userNames[1]} ${translate('typing.multiple')}`
+        : `${userNames[0]} and ${userNames.length - 1} others ${translate('typing.multiple')}`;
 
   // Inline version for conversation list
   if (showInline) {
@@ -42,7 +48,7 @@ export function TypingIndicator({ userNames, className, translate, showInline = 
 
   return (
     <AnimatePresence>
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
@@ -55,25 +61,25 @@ export function TypingIndicator({ userNames, className, translate, showInline = 
               <motion.span
                 key={i}
                 className="h-2 w-2 rounded-full bg-muted-foreground"
-                animate={{ 
+                animate={{
                   y: [0, -4, 0],
-                  opacity: [0.5, 1, 0.5]
+                  opacity: [0.5, 1, 0.5],
                 }}
                 transition={{
                   duration: 0.8,
                   repeat: Infinity,
                   delay: i * 0.15,
-                  ease: "easeInOut"
+                  ease: 'easeInOut',
                 }}
               />
             ))}
           </div>
-          
+
           {/* User avatars for multiple users */}
           {userNames.length > 1 && (
             <div className="flex -space-x-2 ml-1">
               {userNames.slice(0, 3).map((name, i) => (
-                <div 
+                <div
                   key={i}
                   className="h-5 w-5 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold text-primary-foreground border-2 border-card"
                 >
@@ -83,8 +89,8 @@ export function TypingIndicator({ userNames, className, translate, showInline = 
             </div>
           )}
         </div>
-        
-        <motion.span 
+
+        <motion.span
           className="text-xs text-muted-foreground"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -98,7 +104,13 @@ export function TypingIndicator({ userNames, className, translate, showInline = 
 }
 
 // Compact typing indicator for headers
-export function TypingIndicatorCompact({ userNames, translate }: { userNames: string[], translate: (key: string) => string }) {
+export function TypingIndicatorCompact({
+  userNames,
+  translate,
+}: {
+  userNames: string[];
+  translate: (key: string) => string;
+}) {
   if (userNames.length === 0) return null;
 
   return (
@@ -117,7 +129,7 @@ export function TypingIndicatorCompact({ userNames, translate }: { userNames: st
           />
         ))}
       </span>
-      {userNames.length === 1 
+      {userNames.length === 1
         ? `${userNames[0]} ${translate('typing.indicator')}`
         : `${userNames.length} people ${translate('typing.multiple')}`}
     </span>

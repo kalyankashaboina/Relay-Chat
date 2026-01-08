@@ -1,11 +1,6 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-export type MessageStatus =
-  | "pending"
-  | "sent"
-  | "delivered"
-  | "read"
-  | "failed";
+export type MessageStatus = 'pending' | 'sent' | 'delivered' | 'read' | 'failed';
 
 export interface ChatMessage {
   id: string;
@@ -27,7 +22,7 @@ const initialState: MessagesState = {
 };
 
 const messagesSlice = createSlice({
-  name: "messages",
+  name: 'messages',
   initialState,
   reducers: {
     /* =====================================================
@@ -44,23 +39,19 @@ const messagesSlice = createSlice({
 
       // 🔁 1. Replace temp message if exists
       if (msg.tempId) {
-        const tempIndex = messages.findIndex(
-          (m) => m.tempId === msg.tempId
-        );
+        const tempIndex = messages.findIndex((m) => m.tempId === msg.tempId);
 
         if (tempIndex !== -1) {
           messages[tempIndex] = {
             ...msg,
-            status: "sent",
+            status: 'sent',
           };
           return;
         }
       }
 
       // 🔁 2. Deduplicate by real ID
-      const exists = messages.some(
-        (m) => m.id === msg.id
-      );
+      const exists = messages.some((m) => m.id === msg.id);
 
       if (exists) return;
 
@@ -77,25 +68,18 @@ const messagesSlice = createSlice({
         messageId: string;
         conversationId: string;
         createdAt: string;
-      }>
+      }>,
     ) {
-      const {
-        tempId,
-        messageId,
-        conversationId,
-        createdAt,
-      } = action.payload;
+      const { tempId, messageId, conversationId, createdAt } = action.payload;
 
       const messages = state.byConversation[conversationId];
       if (!messages) return;
 
-      const msg = messages.find(
-        (m) => m.tempId === tempId
-      );
+      const msg = messages.find((m) => m.tempId === tempId);
       if (!msg) return;
 
       msg.id = messageId;
-      msg.status = "sent";
+      msg.status = 'sent';
       msg.createdAt = createdAt;
       delete msg.tempId;
     },
@@ -108,17 +92,14 @@ const messagesSlice = createSlice({
       action: PayloadAction<{
         messageId: string;
         conversationId: string;
-      }>
+      }>,
     ) {
-      const { messageId, conversationId } =
-        action.payload;
+      const { messageId, conversationId } = action.payload;
 
-      const msg = state.byConversation[
-        conversationId
-      ]?.find((m) => m.id === messageId);
+      const msg = state.byConversation[conversationId]?.find((m) => m.id === messageId);
 
       if (msg) {
-        msg.status = "delivered";
+        msg.status = 'delivered';
       }
     },
 
@@ -130,18 +111,16 @@ const messagesSlice = createSlice({
       action: PayloadAction<{
         messageIds: string[];
         conversationId: string;
-      }>
+      }>,
     ) {
-      const { messageIds, conversationId } =
-        action.payload;
+      const { messageIds, conversationId } = action.payload;
 
-      const messages =
-        state.byConversation[conversationId];
+      const messages = state.byConversation[conversationId];
       if (!messages) return;
 
       messages.forEach((m) => {
         if (messageIds.includes(m.id)) {
-          m.status = "read";
+          m.status = 'read';
         }
       });
     },
@@ -154,18 +133,15 @@ const messagesSlice = createSlice({
       action: PayloadAction<{
         messageId: string;
         conversationId: string;
-      }>
+      }>,
     ) {
-      const { messageId, conversationId } =
-        action.payload;
+      const { messageId, conversationId } = action.payload;
 
-      const msg = state.byConversation[
-        conversationId
-      ]?.find((m) => m.id === messageId);
+      const msg = state.byConversation[conversationId]?.find((m) => m.id === messageId);
 
       if (msg) {
         msg.isDeleted = true;
-        msg.content = "";
+        msg.content = '';
       }
     },
 

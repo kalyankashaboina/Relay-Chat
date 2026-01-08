@@ -1,15 +1,15 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { setupListeners } from "@reduxjs/toolkit/query/react";
+import { configureStore } from '@reduxjs/toolkit';
+import { setupListeners } from '@reduxjs/toolkit/query/react';
 
-import authReducer from "./auth/auth.slice";
-import uiReducer from "./ui/ui.slice";
+import authReducer from './auth/auth.slice';
+import uiReducer from './ui/ui.slice';
 
-import presenceReducer from "./chat/presence.slice";
-import typingReducer from "./chat/typing.slice";
-import callsReducer from "./chat/calls.slice";
-import messagesReducer from "./chat/messages.slice";
+import presenceReducer from './chat/presence.slice';
+import typingReducer from './chat/typing.slice';
+import callsReducer from './chat/calls.slice';
+import messagesReducer from './chat/messages.slice';
 
-import { api } from "./api"; // 🔑 SINGLE BASE API
+import { api } from './api'; // 🔑 SINGLE BASE API
 
 export const store = configureStore({
   reducer: {

@@ -1,49 +1,41 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
-import {
-  MessageSquare,
-  Mail,
-  Lock,
-  Loader2,
-  ArrowRight,
-} from "lucide-react";
+import { MessageSquare, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
 
-import { toast } from "sonner";
-import { useAppDispatch } from "@/store/hooks";
-import { loginUser } from "@/store/auth/auth.thunks";
+import { toast } from 'sonner';
+import { useAppDispatch } from '@/store/hooks';
+import { loginUser } from '@/store/auth/auth.thunks';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
-const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch();
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    if (!email || !password) {
+      toast.error('Please fill in all fields');
+      return;
+    }
 
-  if (!email || !password) {
-    toast.error("Please fill in all fields");
-    return;
-  }
+    try {
+      await dispatch(loginUser(email, password));
 
-  try {
-    await dispatch(loginUser(email, password))
-
-    toast.success("Welcome back");
-    navigate("/");
-  } catch (err: any) {
-    toast.error(err?.message || "Login failed");
-  }
-};
-
+      toast.success('Welcome back');
+      navigate('/');
+    } catch (err: any) {
+      toast.error(err?.message || 'Login failed');
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
@@ -53,12 +45,8 @@ const handleSubmit = async (e: React.FormEvent) => {
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
             <MessageSquare className="h-8 w-8 text-primary" />
           </div>
-          <h1 className="mt-6 text-3xl font-bold tracking-tight text-foreground">
-            Welcome back
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Sign in to continue
-          </p>
+          <h1 className="mt-6 text-3xl font-bold tracking-tight text-foreground">Welcome back</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Sign in to continue</p>
         </div>
 
         {/* Form */}
@@ -106,12 +94,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             </Link>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            size="lg"
-            disabled={isLoading}
-          >
+          <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -129,20 +112,14 @@ const handleSubmit = async (e: React.FormEvent) => {
         {/* Demo hint */}
         <div className="rounded-lg border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground text-center">
-            Demo credentials:{" "}
-            <span className="font-mono text-foreground">
-              demo@example.com
-            </span>{" "}
-            /{" "}
-            <span className="font-mono text-foreground">
-              password123
-            </span>
+            Demo credentials: <span className="font-mono text-foreground">demo@example.com</span> /{' '}
+            <span className="font-mono text-foreground">password123</span>
           </p>
         </div>
 
         {/* Register link */}
         <p className="text-center text-sm text-muted-foreground">
-          Don’t have an account?{" "}
+          Don’t have an account?{' '}
           <Link
             to="/register"
             className="font-medium text-primary hover:text-primary/80 transition-colors"

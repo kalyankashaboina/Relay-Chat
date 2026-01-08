@@ -27,7 +27,7 @@ const TIMER_OPTIONS = [
 export function VanishModeToggle({ isEnabled, timer, onToggle, translate }: VanishModeToggleProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const currentOption = TIMER_OPTIONS.find(o => o.value === timer) || TIMER_OPTIONS[2];
+  const currentOption = TIMER_OPTIONS.find((o) => o.value === timer) || TIMER_OPTIONS[2];
 
   const handleTimerSelect = (value: number) => {
     onToggle(true, value);
@@ -42,7 +42,7 @@ export function VanishModeToggle({ isEnabled, timer, onToggle, translate }: Vani
             'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all',
             isEnabled
               ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
-              : 'bg-muted text-muted-foreground hover:bg-muted-foreground/20'
+              : 'bg-muted text-muted-foreground hover:bg-muted-foreground/20',
           )}
         >
           <Timer className="h-3.5 w-3.5" />
@@ -58,16 +58,14 @@ export function VanishModeToggle({ isEnabled, timer, onToggle, translate }: Vani
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
-        <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
-          Message Timer
-        </div>
-        {TIMER_OPTIONS.map(option => (
+        <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Message Timer</div>
+        {TIMER_OPTIONS.map((option) => (
           <DropdownMenuItem
             key={option.value}
             onClick={() => handleTimerSelect(option.value)}
             className={cn(
               'cursor-pointer',
-              timer === option.value && isEnabled && 'bg-primary/10 text-primary'
+              timer === option.value && isEnabled && 'bg-primary/10 text-primary',
             )}
           >
             {option.label}
