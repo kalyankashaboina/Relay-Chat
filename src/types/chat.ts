@@ -79,6 +79,7 @@ export interface Conversation {
   vanishTimer?: number;
   pinnedMessages?: string[];
   isAIChat?: boolean;
+    updatedAt?: string; 
 }
 
 export interface QueuedItem {

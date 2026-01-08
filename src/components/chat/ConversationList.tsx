@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setActiveConversationId } from "@/store/ui/ui.slice";
+import { useTranslate } from "@/hooks/useTranslate";
+import { useGetUsersQuery } from "@/store/users/users.api"
+import {
+  useCreateGroupConversationMutation,
+} from "@/store/chat/conversations.api";
+
+
 
 import { Conversation } from "@/types/chat";
 import { cn } from "@/lib/utils";
@@ -82,7 +89,7 @@ function TypingDots() {
 interface ConversationItemProps {
   conversation: Conversation;
   isActive: boolean;
-  isTyping: boolean;
+  typingUsers: string[];
    isOnline: boolean;
   onClick: () => void;
 }
@@ -90,7 +97,7 @@ interface ConversationItemProps {
 function ConversationItem({
   conversation,
   isActive,
-  isTyping,
+  typingUsers,
   onClick,
 isOnline,
 }: ConversationItemProps) {
@@ -105,6 +112,17 @@ isOnline,
     : undefined;
 
   const lastMessageTime = conversation.lastMessage?.timestamp;
+  const isTyping = typingUsers.length > 0;
+
+let typingText = "";
+if (typingUsers.length === 1) {
+  typingText = `${typingUsers[0]} is typing…`;
+} else if (typingUsers.length === 2) {
+  typingText = `${typingUsers[0]}, ${typingUsers[1]} are typing…`;
+} else if (typingUsers.length > 2) {
+  typingText = `${typingUsers.length} people are typing…`;
+}
+
 
   return (
     <button
@@ -174,16 +192,17 @@ isOnline,
   )}
 >
 
-          {isTyping ? (
-            <span className="flex items-center gap-1 text-primary">
-              <TypingDots />
-              typing…
-            </span>
-          ) : conversation.isGroup ? (
-            `${memberCount} members`
-          ) : (
-            conversation.lastMessage?.content || "Start a conversation"
-          )}
+        {isTyping ? (
+  <span className="flex items-center gap-1 text-primary">
+    <TypingDots />
+    {typingText}
+  </span>
+) : conversation.isGroup ? (
+  `${memberCount} members`
+) : (
+  conversation.lastMessage?.content || "Start a conversation"
+)}
+
         </div>
       </div>
     </button>
@@ -201,7 +220,17 @@ export function ConversationList() {
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   
 const onlineUserIds = useAppSelector((s) => s.presence.onlineUserIds);
+const { translate } = useTranslate();
 
+const { data: users = [], isLoading: usersLoading } =
+  useGetUsersQuery();
+  const [
+  createGroupConversation,
+  { isLoading: creatingGroup },
+] = useCreateGroupConversationMutation();
+
+
+console.log("Users data=>",users)
   /* ✅ RTK Query – correct usage */
 const {
   data: response,
@@ -225,6 +254,35 @@ const conversations = response?.data ?? [];
     const name = c.isGroup ? c.groupName : c.user?.username;
     return name?.toLowerCase().includes(searchQuery.toLowerCase());
   });
+
+const handleCreateGroup = async (
+  name: string,
+  members: { id: string }[]
+) => {
+  try {
+    const memberIds = members.map((u) => u.id);
+
+    const res = await createGroupConversation({
+      name,
+      memberIds,
+    }).unwrap();
+
+    const conversation = res.data;
+
+    // 1️⃣ Close modal
+    setShowCreateGroup(false);
+
+    // 2️⃣ Open the new group immediately
+    dispatch(setActiveConversationId(conversation.id));
+
+    // 3️⃣ Sidebar will update automatically because:
+    // - cache was updated OR
+    // - Conversations tag was invalidated
+  } catch (err) {
+    console.error("Group creation failed", err);
+  }
+};
+
 
   return (
     <div className="flex h-full flex-col bg-sidebar">
@@ -269,24 +327,24 @@ const conversations = response?.data ?? [];
     !conversation.isGroup &&
     onlineUserIds.includes(conversation.user?.id ?? "")
   }
-      isTyping={
-        (typingByConversation[conversation.id]?.length ?? 0) > 0
-      }
-      onClick={() =>
-        dispatch(setActiveConversationId(conversation.id))
-      }
+    typingUsers={typingByConversation[conversation.id] ?? []}
+
+       onClick={() => {
+      dispatch(setActiveConversationId(conversation.id));
+    }}
     />
   ))}
 
       </div>
 
-      <CreateGroupModal
-        open={showCreateGroup}
-        onClose={() => setShowCreateGroup(false)}
-        users={[]}
-        onCreateGroup={() => {}}
-        translate={(k) => k}
-      />
+   <CreateGroupModal
+  open={showCreateGroup}
+  onClose={() => setShowCreateGroup(false)}
+  users={users}
+  onCreateGroup={handleCreateGroup}
+  translate={translate}
+/>
+
     </div>
   );
 }

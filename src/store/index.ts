@@ -9,39 +9,31 @@ import typingReducer from "./chat/typing.slice";
 import callsReducer from "./chat/calls.slice";
 import messagesReducer from "./chat/messages.slice";
 
-import { conversationsApi } from "./chat/conversations.api";
-import { messagesApi } from "./chat/messages.api";
+import { api } from "./api"; // 🔑 SINGLE BASE API
 
 export const store = configureStore({
   reducer: {
-
     auth: authReducer,
     ui: uiReducer,
+
     messages: messagesReducer,
     presence: presenceReducer,
     typing: typingReducer,
     calls: callsReducer,
 
-    /* ---------- RTK Query ---------- */
-    [conversationsApi.reducerPath]: conversationsApi.reducer,
-    [messagesApi.reducerPath]: messagesApi.reducer,
+    /* ---------- RTK Query (SINGLE) ---------- */
+    [api.reducerPath]: api.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
-    }).concat(
-      conversationsApi.middleware,
-      messagesApi.middleware
-    ),
+    }).concat(api.middleware),
 
   devTools: import.meta.env.DEV,
 });
 
-
-
 setupListeners(store.dispatch);
-
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

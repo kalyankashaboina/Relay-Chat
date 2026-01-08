@@ -1,5 +1,7 @@
 import type { Socket } from "socket.io-client";
 import type { AppDispatch } from "@/store";
+import { conversationsApi } from "@/store/chat/conversations.api";
+
 
 /* =========================
    PRESENCE
@@ -148,6 +150,20 @@ export function registerSocketListeners(
     console.log("[FE][call:ended]", payload);
     dispatch(callEnded());
   });
+
+
+/* =========================
+   CONVERSATIONS
+========================= */
+
+socket.on("conversation:new", () => {
+  console.log("[FE][conversation:new]");
+  dispatch(
+    conversationsApi.util.invalidateTags(["Conversations"])
+  );
+});
+
+
 
   /* =========================
      DISCONNECT
