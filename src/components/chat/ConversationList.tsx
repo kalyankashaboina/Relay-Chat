@@ -1,35 +1,60 @@
-import { useState } from 'react';
-import { useChat } from '@/context/ChatContext';
-import { Conversation } from '@/types/chat';
-import { cn } from '@/lib/utils';
-import { MessageSquare, Users, Search, Plus, Timer } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { CreateGroupModal } from './CreateGroupModal';
-import { format, isToday, isYesterday } from 'date-fns';
-import { motion } from 'framer-motion';
+import { useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setActiveConversationId } from "@/store/ui/ui.slice";
+
+import { Conversation } from "@/types/chat";
+import { cn } from "@/lib/utils";
+
+import {
+  MessageSquare,
+  Users,
+  Search,
+  Plus,
+  Timer,
+} from "lucide-react";
+
+import { Input } from "@/components/ui/input";
+import { CreateGroupModal } from "./CreateGroupModal";
+
+import { format, isToday, isYesterday } from "date-fns";
+import { motion } from "framer-motion";
+
+import { useGetSidebarConversationsQuery } from "@/store/chat/conversations.api";
+
+/* ---------------------------
+   Helpers
+---------------------------- */
 
 function getInitials(name: string): string {
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function getAvatarColor(name: string): string {
-  const colors = ['bg-primary', 'bg-green-500', 'bg-amber-500', 'bg-rose-500', 'bg-violet-500'];
+  const colors = [
+    "bg-primary",
+    "bg-green-500",
+    "bg-amber-500",
+    "bg-rose-500",
+    "bg-violet-500",
+  ];
   return colors[name.charCodeAt(0) % colors.length];
 }
 
 function formatTime(date?: Date): string {
-  if (!date) return '';
-  if (isToday(date)) return format(date, 'HH:mm');
-  if (isYesterday(date)) return 'Yesterday';
-  return format(date, 'MMM d');
+  if (!date) return "";
+  if (isToday(date)) return format(date, "HH:mm");
+  if (isYesterday(date)) return "Yesterday";
+  return format(date, "MMM d");
 }
 
-interface ConversationItemProps {
-  conversation: Conversation;
-  isActive: boolean;
-  onClick: () => void;
-  isTyping?: boolean;
-}
+/* ---------------------------
+   Typing Indicator
+---------------------------- */
 
 function TypingDots() {
   return (
@@ -50,72 +75,109 @@ function TypingDots() {
   );
 }
 
-function ConversationItem({ conversation, isActive, onClick, isTyping }: ConversationItemProps) {
-  const displayName = conversation.isGroup ? conversation.groupName : conversation.user?.name || 'Unknown';
-  const isOnline = conversation.isGroup ? conversation.users?.some(u => u.isOnline) : conversation.user?.isOnline;
-  const memberCount = conversation.isGroup ? conversation.users?.length : undefined;
+/* ---------------------------
+   Conversation Item
+---------------------------- */
+
+interface ConversationItemProps {
+  conversation: Conversation;
+  isActive: boolean;
+  isTyping: boolean;
+  onClick: () => void;
+}
+
+function ConversationItem({
+  conversation,
+  isActive,
+  isTyping,
+  onClick,
+}: ConversationItemProps) {
+  console.log("Conversation Item data=>",conversation)
+  const displayName = conversation.isGroup
+    ? conversation.groupName
+    : conversation.user?.username || "Unknown";
+
+
+  const isOnline = conversation.isGroup
+    ? conversation.users?.some((u) => u.isOnline)
+    : conversation.user?.isOnline;
+
+  const memberCount = conversation.isGroup
+    ? conversation.users?.length
+    : undefined;
+
   const lastMessageTime = conversation.lastMessage?.timestamp;
 
   return (
     <button
       onClick={onClick}
       className={cn(
-        'w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-200',
-        isActive 
-          ? 'bg-primary/10 border border-primary/20 shadow-sm' 
-          : 'hover:bg-secondary/80 border border-transparent'
+        "w-full flex items-center gap-3 p-3 rounded-xl transition-all",
+        isActive
+          ? "bg-primary/10 border border-primary/20"
+          : "hover:bg-secondary/80 border border-transparent"
       )}
     >
       <div className="relative">
         {conversation.isGroup ? (
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/60 text-primary-foreground">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white">
             <Users className="h-5 w-5" />
           </div>
         ) : (
-          <div className={cn(
-            'flex h-12 w-12 items-center justify-center rounded-full text-sm font-semibold text-white',
-            getAvatarColor(displayName || '')
-          )}>
-            {getInitials(displayName || '')}
+          <div
+            className={cn(
+              "flex h-12 w-12 items-center justify-center rounded-full text-white text-sm font-semibold",
+              getAvatarColor(displayName)
+            )}
+          >
+            {getInitials(displayName)}
           </div>
         )}
+
         {!conversation.isGroup && (
-          <div className={cn(
-            'absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-sidebar',
-            isOnline ? 'bg-green-500' : 'bg-muted'
-          )} />
+          <div
+            className={cn(
+              "absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-sidebar",
+              isOnline ? "bg-green-500" : "bg-muted"
+            )}
+          />
         )}
+
         {conversation.isVanishMode && (
-          <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+          <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-purple-500 flex items-center justify-center">
             <Timer className="h-3 w-3 text-white" />
           </div>
         )}
       </div>
 
-      <div className="flex-1 text-left overflow-hidden">
-        <div className="flex items-center justify-between">
-          <span className="font-medium text-foreground truncate">{displayName}</span>
+      <div className="flex-1 overflow-hidden text-left">
+        <div className="flex justify-between items-center">
+          <span className="font-medium truncate">{displayName}</span>
+
           <div className="flex items-center gap-2">
             {lastMessageTime && (
-              <span className="text-xs text-muted-foreground">{formatTime(lastMessageTime)}</span>
+              <span className="text-xs text-muted-foreground">
+                {formatTime(lastMessageTime)}
+              </span>
             )}
             {conversation.unreadCount > 0 && (
-              <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-xs font-bold text-primary-foreground">
+              <span className="rounded-full bg-primary px-2 text-xs text-white">
                 {conversation.unreadCount}
               </span>
             )}
           </div>
         </div>
+
         <div className="text-sm text-muted-foreground truncate">
           {isTyping ? (
-            <span className="flex items-center gap-1.5 text-primary">
+            <span className="flex items-center gap-1 text-primary">
               <TypingDots />
-              <span>typing...</span>
+              typing…
             </span>
           ) : conversation.isGroup ? (
-            `${memberCount} ${memberCount === 1 ? 'member' : 'members'}`
+            `${memberCount} members`
           ) : (
-            conversation.lastMessage?.content || 'Start a conversation'
+            conversation.lastMessage?.content || "Start a conversation"
           )}
         </div>
       </div>
@@ -123,81 +185,93 @@ function ConversationItem({ conversation, isActive, onClick, isTyping }: Convers
   );
 }
 
+/* ---------------------------
+   Conversation List
+---------------------------- */
+
 export function ConversationList() {
-  const { conversations, activeConversation, setActiveConversation, translate, allUsers, createGroup, isTyping } = useChat();
-  const [searchQuery, setSearchQuery] = useState('');
+  const dispatch = useAppDispatch();
+
+  const [searchQuery, setSearchQuery] = useState("");
   const [showCreateGroup, setShowCreateGroup] = useState(false);
 
-  const filteredConversations = conversations.filter(conv => {
-    const name = conv.isGroup ? conv.groupName : conv.user?.name;
+  /* ✅ RTK Query – correct usage */
+const {
+  data: response,
+  isLoading,
+} = useGetSidebarConversationsQuery();
+
+const conversations = response?.data ?? [];
+
+
+
+  console.log("Sidebar data=>",conversations)
+  const activeConversationId = useAppSelector(
+    (state) => state.ui.activeConversationId
+  );
+
+  const typingByConversation = useAppSelector(
+    (state) => state.typing.byConversation
+  );
+
+  const filtered = conversations.filter((c) => {
+    const name = c.isGroup ? c.groupName : c.user?.username;
     return name?.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  const handleCreateGroup = (name: string, members: any[]) => {
-    createGroup(name, members);
-    setShowCreateGroup(false);
-  };
-
   return (
     <div className="flex h-full flex-col bg-sidebar">
-      {/* Header with search */}
-      <div className="p-3 space-y-3 border-b border-sidebar-border">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+      {/* Header */}
+      <div className="p-3 border-b space-y-3">
+        <div className="flex justify-between items-center">
+          <h2 className="font-semibold flex items-center gap-2">
             <MessageSquare className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold text-sidebar-foreground">{translate('conversations.title')}</h2>
-          </div>
-          <button
-            onClick={() => setShowCreateGroup(true)}
-            className="p-2 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors text-primary"
-            title={translate('group.create')}
-          >
+            Conversations
+          </h2>
+          <button onClick={() => setShowCreateGroup(true)}>
             <Plus className="h-5 w-5" />
           </button>
         </div>
-        
-        {/* Search */}
+
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" />
           <Input
+            className="pl-10"
+            placeholder="Search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={translate('input.search')}
-            className="pl-10 bg-muted/50 border-0"
           />
         </div>
       </div>
 
-      {/* Conversation list */}
+      {/* List */}
       <div className="flex-1 overflow-y-auto p-2 space-y-1">
-        {filteredConversations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
-            <div className="h-12 w-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
-              <MessageSquare className="h-6 w-6 opacity-50" />
-            </div>
-            <p className="text-sm font-medium">{translate('users.noResults')}</p>
-            <p className="text-xs">Try a different search</p>
+        {isLoading && (
+          <div className="text-sm text-muted-foreground p-4">
+            Loading conversations…
           </div>
-        ) : (
-          filteredConversations.map((conversation) => (
+        )}
+
+        {!isLoading &&
+          filtered.map((conversation) => (
             <ConversationItem
               key={conversation.id}
               conversation={conversation}
-              isActive={activeConversation?.id === conversation.id}
-              onClick={() => setActiveConversation(conversation)}
-              isTyping={activeConversation?.id === conversation.id && isTyping}
+              isActive={conversation.id === activeConversationId}
+              isTyping={Boolean(typingByConversation[conversation.id])}
+              onClick={() =>
+                dispatch(setActiveConversationId(conversation.id))
+              }
             />
-          ))
-        )}
+          ))}
       </div>
 
-      {/* Create Group Modal */}
       <CreateGroupModal
         open={showCreateGroup}
         onClose={() => setShowCreateGroup(false)}
-        users={allUsers}
-        onCreateGroup={handleCreateGroup}
-        translate={translate}
+        users={[]}
+        onCreateGroup={() => {}}
+        translate={(k) => k}
       />
     </div>
   );
