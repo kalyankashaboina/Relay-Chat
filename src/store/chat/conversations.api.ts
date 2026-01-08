@@ -29,11 +29,13 @@ export const conversationsApi = api.injectEndpoints({
       providesTags: ['Conversations'],
     }),
 
+    /* ---------- Sidebar search (SERVER-SIDE) ---------- */
     searchSidebarConversations: builder.query<SidebarConversationsResponse, { q: string }>({
       query: ({ q }) => `/api/conversations/search?q=${q}`,
+      providesTags: ['Conversations'], // ✅ IMPORTANT FIX
     }),
 
-    /* ---------- Direct chat ---------- */
+    /* ---------- Direct chat (get-or-create DM) ---------- */
     createConversation: builder.mutation<
       { success: boolean; data: Conversation },
       { userId: string }
@@ -124,6 +126,10 @@ export const conversationsApi = api.injectEndpoints({
 
   overrideExisting: false,
 });
+
+/* ===============================
+   EXPORT HOOKS
+================================ */
 
 export const {
   useGetSidebarConversationsQuery,

@@ -59,13 +59,14 @@ export const registerUser =
 
     try {
       const { data } = await api.post<AuthUser>('/api/auth/register', {
-        name,
+        username: name,
         email,
         password,
       });
 
-      dispatch(authSuccess(data));
-      connectSocket();
+      // dispatch(authSuccess(data));
+      // connectSocket();
+      dispatch(authSuccess(undefined as any)); // Force user to login after registration
     } catch (err: any) {
       dispatch(authFailure(err?.response?.data?.message));
       throw err;
