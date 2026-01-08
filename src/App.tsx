@@ -91,8 +91,12 @@ export default function App() {
     }
   }, [status, dispatch]);
 
-  // Global auth bootstrap loading
-  if (status === 'idle' || status === 'loading') {
+  /**
+   * IMPORTANT FIX:
+   * Only block rendering during INITIAL auth bootstrap.
+   * Do NOT block during login/register (loading state).
+   */
+  if (status === 'idle') {
     return <div className="flex h-screen items-center justify-center">Loading...</div>;
   }
 

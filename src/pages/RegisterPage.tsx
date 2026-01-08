@@ -44,7 +44,7 @@ export default function RegisterPage() {
       await dispatch(registerUser(name, email, password));
 
       toast.success('Account created successfully');
-      navigate('/');
+      navigate('/login');
     } catch (err: any) {
       toast.error(err?.response?.data?.message || err?.message || 'Registration failed');
     }
