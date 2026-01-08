@@ -2,31 +2,46 @@ import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query/react";
 
 import authReducer from "./auth/auth.slice";
+import uiReducer from "./ui/ui.slice";
+
+import presenceReducer from "./chat/presence.slice";
+import typingReducer from "./chat/typing.slice";
+import callsReducer from "./chat/calls.slice";
+import messagesReducer from "./chat/messages.slice";
+
 import { conversationsApi } from "./chat/conversations.api";
+import { messagesApi } from "./chat/messages.api";
 
 export const store = configureStore({
   reducer: {
-    auth: authReducer,
-      // messages: messagesReducer,
-    // presence: presenceReducer,
-    // typing: typingReducer,
-    // calls: callsReducer,
 
-    // RTK Query reducer
+    auth: authReducer,
+    ui: uiReducer,
+    messages: messagesReducer,
+    presence: presenceReducer,
+    typing: typingReducer,
+    calls: callsReducer,
+
+    /* ---------- RTK Query ---------- */
     [conversationsApi.reducerPath]: conversationsApi.reducer,
+    [messagesApi.reducerPath]: messagesApi.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
-    }).concat(conversationsApi.middleware),
+    }).concat(
+      conversationsApi.middleware,
+      messagesApi.middleware
+    ),
 
   devTools: import.meta.env.DEV,
 });
 
-// Enable refetchOnFocus / refetchOnReconnect
+
+
 setupListeners(store.dispatch);
 
-// Types
+
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

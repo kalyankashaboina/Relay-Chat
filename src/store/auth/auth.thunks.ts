@@ -18,13 +18,22 @@ export const checkAuth = () => async (dispatch: AppDispatch) => {
   dispatch(authStart());
 
   try {
-    const { data } = await api.get<AuthUser>("/api/auth/me");
-    dispatch(authSuccess(data));
+    const { data } = await api.get("/api/auth/me");
+
+    const normalizedUser = {
+      id: data._id,          
+      username: data.username,
+      email: data.email,
+      avatar: data.avatar,
+    };
+
+    dispatch(authSuccess(normalizedUser));
     connectSocket();
   } catch {
     dispatch(authFailure(undefined));
   }
 };
+
 
 /* =========================
    LOGIN
