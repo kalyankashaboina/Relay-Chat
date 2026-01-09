@@ -3,7 +3,7 @@ name: Docker → Build & Push (Production Artifact)
 on:
   workflow_run:
     workflows:
-      - "CI → CD → Vercel (Production)"
+      - 'CI → CD → Vercel (Production)'
     types:
       - completed
 
