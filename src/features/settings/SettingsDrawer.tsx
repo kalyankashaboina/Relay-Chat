@@ -6,6 +6,9 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/u
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { logout } from '@/store/auth/auth.thunks';
+import { useAppDispatch } from '@/store/hooks';
+import { useNavigate } from 'react-router-dom';
 
 interface SettingsDrawerProps {
   open: boolean;
@@ -13,6 +16,13 @@ interface SettingsDrawerProps {
 }
 
 export function SettingsDrawer({ open, onClose }: SettingsDrawerProps) {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await dispatch(logout());
+    navigate('/login', { replace: true });
+  };
   return (
     <Drawer open={open} onOpenChange={(v) => !v && onClose()}>
       <DrawerContent className="h-[90dvh]">
@@ -108,6 +118,7 @@ export function SettingsDrawer({ open, onClose }: SettingsDrawerProps) {
               className="w-full gap-2"
               onClick={() => {
                 // You can wire this later to real logout
+                handleLogout();
                 console.log('Logout clicked');
               }}
             >
