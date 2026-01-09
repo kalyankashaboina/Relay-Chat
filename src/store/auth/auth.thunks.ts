@@ -3,6 +3,7 @@ import { authStart, authSuccess, authFailure, logoutSuccess } from './auth.slice
 import { connectSocket, disconnectSocket } from '@/socket/socket';
 import type { AuthUser } from './auth.slice';
 import api from '@/utils/axiosInstance';
+import { rtkApi } from '../api';
 
 /* =========================
    CHECK AUTH (REFRESH)
@@ -64,7 +65,6 @@ export const registerUser =
         password,
       });
 
-      // IMPORTANT: do NOT authenticate after register
       dispatch(logoutSuccess());
     } catch (err: any) {
       dispatch(authFailure(err?.response?.data?.message));
@@ -75,10 +75,15 @@ export const registerUser =
 /* =========================
    LOGOUT
 ========================= */
-
 export const logout = () => async (dispatch: AppDispatch) => {
   try {
-    await api.post('/api/logout');
+    // backend logout
+    await api.post('api/auth/logout');
+
+    dispatch(rtkApi.util.resetApiState());
+
+    // clear auth slice
+    dispatch({ type: 'auth/clear' });
   } finally {
     disconnectSocket();
     dispatch(logoutSuccess());

@@ -1,5 +1,5 @@
-import { api } from '@/store/api';
 import type { Message } from '@/types/chat';
+import { rtkApi } from '../api';
 
 /* ===============================
    API RESPONSE TYPES
@@ -16,7 +16,7 @@ export interface MessagesResponse {
    MESSAGES API
 ================================ */
 
-export const messagesApi = api.injectEndpoints({
+export const messagesApi = rtkApi.injectEndpoints({
   endpoints: (builder) => ({
     /* ---------- Get messages for a conversation ---------- */
 

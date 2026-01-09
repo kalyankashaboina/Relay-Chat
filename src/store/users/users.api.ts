@@ -1,5 +1,5 @@
-import { api } from '@/store/api';
 import type { User } from '@/types/chat';
+import { rtkApi } from '../api';
 
 export interface PaginatedUsersResponse {
   data: User[];
@@ -21,7 +21,7 @@ export interface GetUsersArgs {
    USERS API (SINGLE ENDPOINT)
 ================================ */
 
-export const usersApi = api.injectEndpoints({
+export const usersApi = rtkApi.injectEndpoints({
   endpoints: (builder) => ({
     /**
      * GET /api/users
