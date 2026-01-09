@@ -63,11 +63,16 @@ export function CreateGroupModal({
      API CALL (SINGLE ENDPOINT)
   ================================ */
 
-  const { data, isFetching, isError } = useGetUsersQuery({
-    q: debouncedSearch,
-    cursor,
-    limit: 20,
-  });
+  const { data, isFetching, isError } = useGetUsersQuery(
+    {
+      q: debouncedSearch,
+      cursor,
+      limit: 20,
+    },
+    {
+      skip: !open,
+    },
+  );
 
   const users = (data?.data ?? []).filter((u) => u.id !== currentUserId);
   const hasMore = data?.hasMore ?? false;

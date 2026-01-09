@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setActiveConversationId } from '@/store/ui/ui.slice';
 
-import { useGetUsersQuery } from '@/store/users/users.api';
 import {
   useGetSidebarConversationsQuery,
   useSearchSidebarConversationsQuery,
@@ -16,7 +15,6 @@ import { MessageSquare, Users, Search, Plus, Timer } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
 import { CreateGroupModal } from './CreateGroupModal';
-import { StartChatModal } from './StartChatModal';
 
 import {
   DropdownMenu,
@@ -93,14 +91,12 @@ function ConversationItem({
   conversation,
   isActive,
   typingUsers,
-  onClick,
   isOnline,
+  onClick,
 }: ConversationItemProps) {
   const displayName = conversation.isGroup
     ? conversation.groupName
     : conversation.user?.username || 'Unknown';
-
-  const memberCount = conversation.isGroup ? conversation.users?.length : undefined;
 
   const lastMessageTime = conversation.lastMessage?.timestamp;
   const isTyping = typingUsers.length > 0;
@@ -156,11 +152,7 @@ function ConversationItem({
         </div>
 
         <div className="text-sm truncate">
-          {isTyping
-            ? 'Typing…'
-            : conversation.isGroup
-              ? `${memberCount} members`
-              : conversation.lastMessage?.content || 'Start a conversation'}
+          {isTyping ? <TypingDots /> : conversation.lastMessage?.content || 'No messages yet'}
         </div>
       </div>
     </button>
@@ -176,29 +168,23 @@ export function ConversationList() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateGroup, setShowCreateGroup] = useState(false);
-  const [showStartChat, setShowStartChat] = useState(false);
+
+  const activeConversationId = useAppSelector((s) => s.ui.activeConversationId);
   const { translate } = useTranslate();
   const onlineUserIds = useAppSelector((s) => s.presence.onlineUserIds);
-  const activeConversationId = useAppSelector((state) => state.ui.activeConversationId);
-  const typingByConversation = useAppSelector((state) => state.typing.byConversation);
+  const typingByConversation = useAppSelector((s) => s.typing.byConversation);
 
-  const { data: usersResponse } = useGetUsersQuery({ limit: 20 });
-  const users = usersResponse?.data ?? [];
-
-  const sidebarListQuery = useGetSidebarConversationsQuery(undefined, {
+  const listQuery = useGetSidebarConversationsQuery(undefined, {
     skip: !!searchQuery,
   });
 
-  const sidebarSearchQuery = useSearchSidebarConversationsQuery(
+  const searchQueryResult = useSearchSidebarConversationsQuery(
     { q: searchQuery },
-    {
-      skip: !searchQuery,
-    },
+    { skip: !searchQuery },
   );
 
-  const data = searchQuery ? sidebarSearchQuery.data : sidebarListQuery.data;
-
-  const isLoading = searchQuery ? sidebarSearchQuery.isLoading : sidebarListQuery.isLoading;
+  const data = searchQuery ? searchQueryResult.data : listQuery.data;
+  const isLoading = searchQuery ? searchQueryResult.isLoading : listQuery.isLoading;
 
   const conversations = data?.data ?? [];
 
@@ -228,7 +214,6 @@ export function ConversationList() {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setShowStartChat(true)}>Start Chat</DropdownMenuItem>
               <DropdownMenuItem onClick={() => setShowCreateGroup(true)}>
                 Create Group
               </DropdownMenuItem>
@@ -249,40 +234,26 @@ export function ConversationList() {
 
       {/* List */}
       <div className="flex-1 overflow-y-auto p-2">
-        {!isLoading && conversations.length === 0 && !searchQuery && (
-          <div className="h-full flex flex-col items-center justify-center gap-3 text-center text-muted-foreground">
+        {!isLoading && conversations.length === 0 && (
+          <div className="h-full flex flex-col items-center justify-center gap-2 text-center text-muted-foreground">
             <MessageSquare className="h-10 w-10 text-primary/60" />
             <p className="text-sm">No conversations yet</p>
-            <div className="flex gap-2">
-              <button
-                className="px-4 py-2 rounded-md bg-primary text-white text-sm"
-                onClick={() => setShowStartChat(true)}
-              >
-                Start Chat
-              </button>
-              <button
-                className="px-4 py-2 rounded-md border text-sm"
-                onClick={() => setShowCreateGroup(true)}
-              >
-                Create Group
-              </button>
-            </div>
+            <p className="text-xs">
+              Start one from the <b>New Chat</b> tab
+            </p>
           </div>
         )}
 
-        {!isLoading &&
-          conversations.map((conversation) => (
-            <ConversationItem
-              key={conversation.id}
-              conversation={conversation}
-              isActive={conversation.id === activeConversationId}
-              isOnline={
-                !conversation.isGroup && onlineUserIds.includes(conversation.user?.id ?? '')
-              }
-              typingUsers={typingByConversation[conversation.id] ?? []}
-              onClick={() => dispatch(setActiveConversationId(conversation.id))}
-            />
-          ))}
+        {conversations.map((conversation) => (
+          <ConversationItem
+            key={conversation.id}
+            conversation={conversation}
+            isActive={conversation.id === activeConversationId}
+            isOnline={!conversation.isGroup && onlineUserIds.includes(conversation.user?.id ?? '')}
+            typingUsers={typingByConversation[conversation.id] ?? []}
+            onClick={() => dispatch(setActiveConversationId(conversation.id))}
+          />
+        ))}
       </div>
 
       <CreateGroupModal
@@ -291,8 +262,6 @@ export function ConversationList() {
         onCreateGroup={handleCreateGroup}
         translate={translate}
       />
-
-      <StartChatModal open={showStartChat} onClose={() => setShowStartChat(false)} />
     </div>
   );
 }

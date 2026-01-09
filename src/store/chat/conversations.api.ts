@@ -1,5 +1,5 @@
-import { api } from '@/store/api';
 import type { Conversation } from '@/types/chat';
+import { rtkApi } from '../api';
 
 /* ===============================
    API RESPONSE TYPES
@@ -21,7 +21,7 @@ interface CreateGroupPayload {
    CONVERSATIONS API
 ================================ */
 
-export const conversationsApi = api.injectEndpoints({
+export const conversationsApi = rtkApi.injectEndpoints({
   endpoints: (builder) => ({
     /* ---------- Sidebar conversations ---------- */
     getSidebarConversations: builder.query<SidebarConversationsResponse, void>({

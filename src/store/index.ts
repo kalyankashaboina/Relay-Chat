@@ -8,8 +8,7 @@ import presenceReducer from './chat/presence.slice';
 import typingReducer from './chat/typing.slice';
 import callsReducer from './chat/calls.slice';
 import messagesReducer from './chat/messages.slice';
-
-import { api } from './api'; // 🔑 SINGLE BASE API
+import { rtkApi } from './api';
 
 export const store = configureStore({
   reducer: {
@@ -22,13 +21,13 @@ export const store = configureStore({
     calls: callsReducer,
 
     /* ---------- RTK Query (SINGLE) ---------- */
-    [api.reducerPath]: api.reducer,
+    [rtkApi.reducerPath]: rtkApi.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
-    }).concat(api.middleware),
+    }).concat(rtkApi.middleware),
 
   devTools: import.meta.env.DEV,
 });
