@@ -102,14 +102,16 @@ export function ChatLayout() {
   ];
 
   return (
-    <div className="flex h-[100dvh] flex-col overflow-hidden bg-background">
-      <NetworkStatusBar />
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-background pb-safe">
+      <div className="hidden md:block">
+        <NetworkStatusBar />
+      </div>
 
       <div className="flex flex-1 overflow-hidden">
         {/* ================= SIDEBAR ================= */}
         <div
           className={cn(
-            'w-full md:w-80 lg:w-96 border-r border-border bg-card/50 flex flex-col',
+            'w-full md:w-72 lg:w-80 border-r border-border bg-card/50 flex flex-col',
             showConversationList ? 'flex' : 'hidden md:flex',
           )}
         >
