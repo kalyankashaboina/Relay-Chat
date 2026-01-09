@@ -4,7 +4,7 @@ import { registerSocketListeners } from './registerListeners';
 
 let socket: Socket | null = null;
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:4000';
+const SOCKET_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
 
 export function connectSocket(): Socket {
   if (socket) {
