@@ -1,11 +1,10 @@
-
 node_modules
 dist
 .git
 .gitignore
-Dockerfile
-Dockerfile.prod
+Dockerfile.local
 npm-debug.log*
 .vscode
 .husky
 coverage
+.env
