@@ -33,6 +33,9 @@ function AuthRoute({ children }: { children: React.ReactNode }) {
   return user ? <Navigate to="/" replace /> : <>{children}</>;
 }
 
+console.log('App component loaded');
+console.log(import.meta.env.VITE_API_BASE_URL);
+
 /* =========================
    ROUTES
 ========================= */
