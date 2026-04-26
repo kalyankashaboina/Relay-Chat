@@ -9,16 +9,18 @@ import { useAppDispatch, useAppSelector } from '@/store';
 import { initAuth, selectUser, selectIsInitialized } from '@/features/auth/authSlice';
 import { SettingsProvider } from '@/features/settings/components/SettingsProvider';
 import { socketClient } from '@/features/chat/services/socketClient';
+import webrtcService from '@/features/chat/services/webrtcService';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
-const Index              = lazy(() => import('./pages/Index'));
-const LoginPage          = lazy(() => import('@/features/auth/pages/LoginPage'));
-const RegisterPage       = lazy(() => import('@/features/auth/pages/RegisterPage'));
+const Index = lazy(() => import('./pages/Index'));
+const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage'));
+const RegisterPage = lazy(() => import('@/features/auth/pages/RegisterPage'));
 const ForgotPasswordPage = lazy(() => import('@/features/auth/pages/ForgotPasswordPage'));
-const NotFound           = lazy(() => import('./pages/NotFound'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 function LoadingScreen() {
   return (
-    <div className="flex items-center justify-center h-dvh bg-background">
+    <div className="flex h-dvh items-center justify-center bg-background">
       <div className="flex flex-col items-center gap-3">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         <p className="text-sm text-muted-foreground">Loading…</p>
@@ -29,7 +31,7 @@ function LoadingScreen() {
 
 function AuthInit() {
   const dispatch = useAppDispatch();
-  const user     = useAppSelector(selectUser);
+  const user = useAppSelector(selectUser);
   const initialized = useAppSelector(selectIsInitialized);
 
   // Validate session on mount
@@ -41,6 +43,8 @@ function AuthInit() {
   useEffect(() => {
     if (user) {
       socketClient.connect();
+      // BUG FIX #7: Setup WebRTC listeners after socket connection
+      webrtcService.setupWebRTCListeners();
     } else {
       socketClient.disconnect();
     }
@@ -51,7 +55,7 @@ function AuthInit() {
 }
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const user        = useAppSelector(selectUser);
+  const user = useAppSelector(selectUser);
   const initialized = useAppSelector(selectIsInitialized);
   if (!initialized) return <LoadingScreen />;
   if (!user) return <Navigate to="/login" replace />;
@@ -59,7 +63,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AuthRoute({ children }: { children: React.ReactNode }) {
-  const user        = useAppSelector(selectUser);
+  const user = useAppSelector(selectUser);
   const initialized = useAppSelector(selectIsInitialized);
   if (!initialized) return <LoadingScreen />;
   if (user) return <Navigate to="/" replace />;
@@ -70,15 +74,45 @@ function AppRoutes() {
   return (
     <>
       <AuthInit />
-      <Suspense fallback={<LoadingScreen />}>
-        <Routes>
-          <Route path="/"                element={<ProtectedRoute><Index /></ProtectedRoute>} />
-          <Route path="/login"           element={<AuthRoute><LoginPage /></AuthRoute>} />
-          <Route path="/register"        element={<AuthRoute><RegisterPage /></AuthRoute>} />
-          <Route path="/forgot-password" element={<AuthRoute><ForgotPasswordPage /></AuthRoute>} />
-          <Route path="*"                element={<NotFound />} />
-        </Routes>
-      </Suspense>
+      <ErrorBoundary>
+        <Suspense fallback={<LoadingScreen />}>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Index />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                <AuthRoute>
+                  <LoginPage />
+                </AuthRoute>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <AuthRoute>
+                  <RegisterPage />
+                </AuthRoute>
+              }
+            />
+            <Route
+              path="/forgot-password"
+              element={
+                <AuthRoute>
+                  <ForgotPasswordPage />
+                </AuthRoute>
+              }
+            />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </ErrorBoundary>
     </>
   );
 }
