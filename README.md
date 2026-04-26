@@ -1,111 +1,143 @@
-# 🎨 Relay Chat Frontend
+# 🎨 Relay Chat - Frontend
 
-Modern React chat application with real-time messaging and beautiful UI.
+![React](https://img.shields.io/badge/React-18.3.1-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.6.2-blue)
+![Status](https://img.shields.io/badge/status-production--ready-green)
 
-## 🎯 Quick Start
+Modern, real-time chat application frontend built with React 18, TypeScript, Redux Toolkit, Socket.IO, and WebRTC.
+
+---
+
+## ✨ Features
+
+- 🔄 Real-time messaging via WebSocket
+- 📹 Video/audio calling with WebRTC
+- 💬 Typing indicators & read receipts
+- 😀 Message reactions
+- 👥 Group chats
+- 📎 File uploads
+- 🌓 Dark/Light theme
+- 📱 Mobile responsive
+- ⚡ PWA support
+
+---
+
+## 🚀 Quick Start
 
 ```bash
 # Install dependencies
-npm install
+npm install --legacy-peer-deps
 
-# Run development server
+# Configure environment
+cp .env.example .env
+# Edit .env with your backend URL
+
+# Start development server
 npm run dev
 ```
 
-Access: http://localhost:5173
+Access at: `http://localhost:5173`
 
-## 📦 Prerequisites
+---
 
-- Node.js 20+
-- Backend running on http://localhost:4000
+## 📋 Prerequisites
 
-## 🌐 Environment (.env)
+- Node.js v18+
+- Backend API running (see backend repository)
 
-```bash
-VITE_API_URL=http://localhost:4000
+---
+
+## ⚙️ Environment Variables
+
+Create `.env` file:
+
+```env
+VITE_API_BASE_URL=http://localhost:4000
+VITE_APP_NAME=Relay Chat
+VITE_APP_VERSION=1.1.0
 ```
 
-## 🔧 Scripts
+---
+
+## 📜 Scripts
 
 ```bash
-npm run dev          # Development server with HMR
-npm run build        # Production build
+npm run dev          # Start dev server
+npm run build        # Build for production
 npm run preview      # Preview production build
-npm run type-check   # TypeScript check
-npm run lint         # ESLint
-npm run test:e2e     # Playwright E2E tests
+npm run lint         # Run ESLint
+npm run type-check   # TypeScript validation
 ```
 
-## 🧪 Testing
+---
 
-### E2E Tests (Playwright)
+## 🛠 Tech Stack
 
-```bash
-# Install Playwright browsers
-npx playwright install chromium
-
-# Run tests
-npm run test:e2e
-
-# Run tests in UI mode
-npm run test:e2e:ui
-```
-
-## 🎨 Tech Stack
-
-- React 18
-- TypeScript
-- Vite
-- TailwindCSS
-- RTK Query
+- React 18 + TypeScript
+- Redux Toolkit
 - Socket.IO Client
+- WebRTC
+- Tailwind CSS + shadcn/ui
+- Framer Motion
 - React Router
-- Shadcn/ui components
+- Axios
 
-## ✅ Features
-
-- Real-time messaging
-- Typing indicators
-- Read receipts
-- Message reactions
-- Voice/Video calls (WebRTC)
-- File uploads
-- Dark/Light theme
-- Responsive design
-- PWA support
-- Error boundaries
+---
 
 ## 📁 Structure
 
 ```
-frontend/
-├── src/
-│   ├── components/       # Shared components
-│   ├── features/
-│   │   ├── auth/        # Authentication
-│   │   ├── chat/        # Chat features
-│   │   └── api/         # RTK Query
-│   ├── App.tsx
-│   └── main.tsx
-├── public/
-└── package.json
+src/
+├── features/         # Feature modules (auth, chat, settings)
+├── components/       # Shared UI components
+├── shared/          # Utils, hooks, constants
+├── store/           # Redux store
+├── config/          # Configuration
+└── App.tsx          # Root component
 ```
 
-## 🚀 Build for Production
+---
+
+## 🚀 Deployment
+
+### Build
 
 ```bash
 npm run build
 ```
 
-Output: `dist/` (1.3MB bundle, 134KB gzipped)
+### Deploy to
 
-## 🐳 Docker Production
-
-```bash
-docker build -t relay-chat-frontend .
-docker run -p 8080:8080 relay-chat-frontend
-```
+- **Vercel** (recommended): `vercel --prod`
+- **Netlify**: `netlify deploy --prod`
+- **Cloudflare Pages**: Connect GitHub repo
 
 ---
 
-**Frontend for Relay Chat**
+## 🔌 Socket Events
+
+**Listening:** presence:init, user:online, user:offline, message:new, message:sent, message:confirmed, message:delivered, message:read, typing:start, typing:stop, call:incoming, call:accepted, webrtc:offer, etc.
+
+**Emitting:** message:send, typing:start, typing:stop, call:initiate, call:accept, webrtc:offer, etc.
+
+See full list in `/src/config/index.ts`
+
+---
+
+## 🐛 Troubleshooting
+
+**Install fails:** Use `npm install --legacy-peer-deps`
+
+**WebSocket fails:** Check `VITE_API_BASE_URL` and backend CORS
+
+**Build fails:** Run `npm run type-check` to see errors
+
+---
+
+## 📝 License
+
+MIT License
+
+---
+
+**Built with ❤️ using React, TypeScript, and WebRTC**
