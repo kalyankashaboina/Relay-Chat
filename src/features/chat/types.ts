@@ -2,6 +2,12 @@ export type MessageStatus = 'pending' | 'sent' | 'delivered' | 'read' | 'failed'
 
 export type FileType = 'image' | 'video' | 'audio' | 'document' | 'text';
 
+export type Language = 'en' | 'es';
+export type Theme = 'dark' | 'light' | 'system';
+
+export type CallType = 'audio' | 'video';
+export type CallStatus = 'idle' | 'calling' | 'connecting' | 'connected' | 'ended';
+
 export interface FileAttachment {
   id: string;
   name: string;
@@ -19,7 +25,7 @@ export interface MessageReaction {
   emoji: string;
   userId: string;
   userName: string;
-  timestamp?: Date;
+  timestamp?: string;
 }
 
 export interface ReplyTo {
@@ -31,32 +37,31 @@ export interface ReplyTo {
 export interface ReadReceipt {
   userId: string;
   userName: string;
-  readAt: Date;
+  readAt: string;
 }
 
 export interface Message {
   id: string;
   content: string;
   senderId: string;
-  timestamp: Date;
+  timestamp: string;
   status: MessageStatus;
   attachments: FileAttachment[];
   isOwn: boolean;
   isEdited?: boolean;
-  editedAt?: Date;
+  editedAt?: string;
   isDeleted?: boolean;
   reactions?: MessageReaction[];
   isVanish?: boolean;
   vanishTimer?: number;
-  vanishAt?: Date;
+  vanishAt?: string;
   replyTo?: ReplyTo;
   forwardedFrom?: string;
   isPinned?: boolean;
   readBy?: ReadReceipt[];
   isAI?: boolean;
-  // New features
   isStarred?: boolean;
-  mentions?: string[]; // User IDs mentioned in the message
+  mentions?: string[];
 }
 
 export interface User {
@@ -65,7 +70,7 @@ export interface User {
   email: string;
   avatar: string;
   isOnline: boolean;
-  lastSeen?: Date;
+  lastSeen?: string;
 }
 
 export interface Conversation {
@@ -82,7 +87,6 @@ export interface Conversation {
   vanishTimer?: number;
   pinnedMessages?: string[];
   isAIChat?: boolean;
-  // New features
   isMuted?: boolean;
   isArchived?: boolean;
   isPinned?: boolean;
@@ -95,23 +99,17 @@ export interface QueuedItem {
   messageId?: string;
   retryCount: number;
   maxRetries: number;
-  createdAt: Date;
+  createdAt: string;
   status: 'pending' | 'processing' | 'failed';
 }
-
-export type Language = 'en' | 'es';
-export type Theme = 'dark' | 'light' | 'system';
 
 export interface ScheduledMessage {
   id: string;
   content: string;
-  scheduledAt: Date;
+  scheduledAt: string;
   conversationId?: string;
   attachments?: File[];
 }
-
-export type CallType = 'audio' | 'video';
-export type CallStatus = 'idle' | 'calling' | 'connecting' | 'connected' | 'ended';
 
 export interface CallState {
   type: CallType;
@@ -128,7 +126,7 @@ export interface CallRecord {
   id: string;
   type: CallType;
   user: User;
-  timestamp: Date;
+  timestamp: string;
   duration: number;
   status: 'completed' | 'missed' | 'declined';
   isOutgoing: boolean;

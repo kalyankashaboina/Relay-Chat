@@ -3,20 +3,39 @@
 
 import { io, type Socket } from 'socket.io-client';
 import { SOCKET_URL, SOCKET_EVENTS } from '@/config';
+import { eventLogger } from '@/shared/services/eventLogger';
 
 // ── Re-export event types so existing useSocket.ts imports still work ────────
 
 export type SocketEventType =
-  | 'message:received' | 'message:status' | 'message:new'
-  | 'message:sent'     | 'message:delivered' | 'message:read'
-  | 'message:deleted'  | 'message:edited'    | 'message:failed'
-  | 'typing:start'     | 'typing:stop'
-  | 'user:online'      | 'user:offline'
-  | 'reaction:added'   | 'reaction:removed'
-  | 'read:receipt'     | 'connection:status'
-  | 'presence:init'    | 'conversation:new'
-  | 'call:incoming'    | 'call:accepted'     | 'call:rejected'
-  | 'call:ended'       | 'call:busy';
+  | 'message:received'
+  | 'message:status'
+  | 'message:new'
+  | 'message:sent'
+  | 'message:confirmed'
+  | 'message:delivered'
+  | 'message:read'
+  | 'message:deleted'
+  | 'message:edited'
+  | 'message:failed'
+  | 'typing:start'
+  | 'typing:stop'
+  | 'user:online'
+  | 'user:offline'
+  | 'reaction:added'
+  | 'reaction:removed'
+  | 'read:receipt'
+  | 'connection:status'
+  | 'presence:init'
+  | 'conversation:new'
+  | 'call:incoming'
+  | 'call:accepted'
+  | 'call:rejected'
+  | 'call:ended'
+  | 'call:busy'
+  | 'webrtc:offer'
+  | 'webrtc:answer'
+  | 'webrtc:ice';
 
 export interface SocketEvent<T = unknown> {
   type: SocketEventType;
@@ -27,8 +46,11 @@ export interface SocketEvent<T = unknown> {
 export interface MessageReceivedPayload {
   conversationId: string;
   message: {
-    id: string; content: string; senderId: string;
-    senderName: string; timestamp: Date;
+    id: string;
+    content: string;
+    senderId: string;
+    senderName: string;
+    timestamp: Date;
   };
 }
 
@@ -76,13 +98,14 @@ export interface ConnectionStatusPayload {
 class RealSocket {
   private socket: Socket | null = null;
   private _connected = false;
+  private connectionListeners: ((connected: boolean) => void)[] = [];
 
   /** Call once after login — creates the socket with cookie auth */
   connect(): void {
     if (this.socket?.connected) return;
 
     this.socket = io(SOCKET_URL, {
-      withCredentials: true,      // sends relay_token cookie
+      withCredentials: true, // sends relay_token cookie
       transports: ['websocket'],
       reconnection: true,
       reconnectionAttempts: 10,
@@ -90,8 +113,18 @@ class RealSocket {
       reconnectionDelayMax: 30000,
     });
 
-    this.socket.on('connect',    () => { this._connected = true; });
-    this.socket.on('disconnect', () => { this._connected = false; });
+    this.socket.on('connect', () => {
+      this._connected = true;
+      eventLogger.log('SOCKET_CONNECT', { payload: { url: SOCKET_URL } });
+      // BUG FIX #9: Notify connection status listeners
+      this.connectionListeners.forEach((cb) => cb(true));
+    });
+    this.socket.on('disconnect', () => {
+      this._connected = false;
+      eventLogger.log('SOCKET_DISCONNECT');
+      // BUG FIX #9: Notify connection status listeners
+      this.connectionListeners.forEach((cb) => cb(false));
+    });
   }
 
   /** Call on logout */
@@ -99,6 +132,7 @@ class RealSocket {
     this.socket?.disconnect();
     this.socket = null;
     this._connected = false;
+    this.connectionListeners.forEach((cb) => cb(false));
   }
 
   reconnect(): void {
@@ -107,6 +141,16 @@ class RealSocket {
 
   getConnectionStatus(): boolean {
     return this.socket?.connected ?? false;
+  }
+
+  /** Subscribe to connection status changes - BUG FIX #9 */
+  onConnectionChange(callback: (connected: boolean) => void): () => void {
+    this.connectionListeners.push(callback);
+    // Immediately call with current status
+    callback(this._connected);
+    return () => {
+      this.connectionListeners = this.connectionListeners.filter((cb) => cb !== callback);
+    };
   }
 
   // ── Subscribe ─────────────────────────────────────────────────────────────
@@ -119,57 +163,96 @@ class RealSocket {
     };
 
     this.socket.on(event, handler);
-    return () => { this.socket?.off(event, handler); };
+    return () => {
+      this.socket?.off(event, handler);
+    };
   }
 
   // ── Emit helpers (used by useChat / CallOverlay) ──────────────────────────
 
-  sendMessage(payload: { conversationId: string; content: string; tempId: string; replyTo?: unknown }): void {
+  sendMessage(payload: {
+    conversationId: string;
+    content: string;
+    tempId: string;
+    replyTo?: unknown;
+  }): void {
+    eventLogger.log('MESSAGE_SEND', {
+      tempId: payload.tempId,
+      conversationId: payload.conversationId,
+      payload: { content: payload.content },
+    });
     this.socket?.emit(SOCKET_EVENTS.MSG_SEND, payload);
   }
 
   deleteMessage(messageId: string): void {
+    eventLogger.log('MESSAGE_DELETED', { messageId });
     this.socket?.emit(SOCKET_EVENTS.MSG_DELETE, { messageId });
   }
 
   editMessage(messageId: string, content: string): void {
+    eventLogger.log('MESSAGE_EDITED', { messageId, payload: { content } });
     this.socket?.emit(SOCKET_EVENTS.MSG_EDIT, { messageId, content });
   }
 
   react(messageId: string, emoji: string, conversationId: string): void {
+    eventLogger.log('REACTION_ADDED', { messageId, conversationId, payload: { emoji } });
     this.socket?.emit(SOCKET_EVENTS.MSG_REACT, { messageId, emoji, conversationId });
   }
 
   unreact(messageId: string, emoji: string, conversationId: string): void {
+    eventLogger.log('REACTION_REMOVED', { messageId, conversationId, payload: { emoji } });
     this.socket?.emit(SOCKET_EVENTS.MSG_UNREACT, { messageId, emoji, conversationId });
   }
 
   typingStart(conversationId: string): void {
+    eventLogger.log('TYPING_START', { conversationId });
     this.socket?.emit(SOCKET_EVENTS.TYPING_START, { conversationId });
   }
 
   typingStop(conversationId: string): void {
+    eventLogger.log('TYPING_STOP', { conversationId });
     this.socket?.emit(SOCKET_EVENTS.TYPING_STOP, { conversationId });
   }
 
   markRead(conversationId: string): void {
+    eventLogger.log('CONNECTION_STATUS_CHANGE', {
+      conversationId,
+      payload: { action: 'mark_read' },
+    });
     this.socket?.emit(SOCKET_EVENTS.CONV_READ, { conversationId });
   }
 
   initiateCall(toUserId: string, type: 'audio' | 'video'): void {
+    eventLogger.log('CALL_INCOMING', { userId: toUserId, payload: { type } });
     this.socket?.emit(SOCKET_EVENTS.CALL_INITIATE, { toUserId, type });
   }
 
   acceptCall(fromUserId: string): void {
+    eventLogger.log('CALL_ACCEPTED', { userId: fromUserId });
     this.socket?.emit(SOCKET_EVENTS.CALL_ACCEPT, { fromUserId });
   }
 
   rejectCall(fromUserId: string): void {
+    eventLogger.log('CALL_REJECTED', { userId: fromUserId });
     this.socket?.emit(SOCKET_EVENTS.CALL_REJECT, { fromUserId });
   }
 
   endCall(toUserId: string): void {
+    eventLogger.log('CALL_ENDED', { userId: toUserId });
     this.socket?.emit(SOCKET_EVENTS.CALL_END, { toUserId });
+  }
+
+  // WebRTC Signaling Methods
+  sendWebRTCOffer(toUserId: string, offer: RTCSessionDescriptionInit): void {
+    this.socket?.emit(SOCKET_EVENTS.WEBRTC_OFFER, { toUserId, offer });
+  }
+
+  sendWebRTCAnswer(toUserId: string, answer: RTCSessionDescriptionInit): void {
+    this.socket?.emit(SOCKET_EVENTS.WEBRTC_ANSWER, { toUserId, answer });
+  }
+
+  sendICECandidate(toUserId: string, candidate: RTCIceCandidateInit): void {
+    this.socket?.emit(SOCKET_EVENTS.WEBRTC_ICE, { toUserId, candidate });
   }
 
   // Legacy compat stubs used by useSocket.ts hook
@@ -177,15 +260,31 @@ class RealSocket {
     this.typingStart(conversationId);
   }
 
-  triggerMessageReceived(_conversationId: string, _message: unknown): void { /* server-driven */ }
-  triggerReadReceipt(conversationId: string, _messageId: string, _userId: string, _userName: string): void {
+  triggerMessageReceived(_conversationId: string, _message: unknown): void {
+    /* server-driven */
+  }
+  triggerReadReceipt(
+    conversationId: string,
+    _messageId: string,
+    _userId: string,
+    _userName: string
+  ): void {
     this.markRead(conversationId);
   }
-  triggerReaction(conversationId: string, messageId: string, _userId: string, _userName: string, emoji: string, added: boolean): void {
+  triggerReaction(
+    conversationId: string,
+    messageId: string,
+    _userId: string,
+    _userName: string,
+    emoji: string,
+    added: boolean
+  ): void {
     if (added) this.react(messageId, emoji, conversationId);
-    else        this.unreact(messageId, emoji, conversationId);
+    else this.unreact(messageId, emoji, conversationId);
   }
-  queueMessageStatusUpdate(_messageId: string): void { /* server handles status */ }
+  queueMessageStatusUpdate(_messageId: string): void {
+    /* server handles status */
+  }
 }
 
 export const socketClient = new RealSocket();
