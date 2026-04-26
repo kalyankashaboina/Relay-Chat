@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout EXACT commit that passed CI
+      # Checkout exact commit that passed CI
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -44,11 +44,10 @@ jobs:
         env:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
 
-      # Deploy to Vercel (production)
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      # Deploy using CLI (stable + future-proof)
       - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
+        run: |
+          vercel --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
