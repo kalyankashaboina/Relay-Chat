@@ -1,4 +1,4 @@
-import { api } from '@/lib/apiClient';
+import { api } from '@/shared/api/client';
 import type { AuthUser } from '@/features/chat/types';
 
 export interface AuthResult {

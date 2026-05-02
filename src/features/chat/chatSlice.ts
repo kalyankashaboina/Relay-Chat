@@ -185,7 +185,6 @@ export const sendMessageAsync = createAsyncThunk(
       replyTo: state.replyingTo,
     });
 
-    // BUG FIX #11: Timeout for pending messages
     setTimeout(() => {
       const currentState = (getState() as { chat: ChatState }).chat;
       const msgs = currentState.messagesMap[convId] || [];
