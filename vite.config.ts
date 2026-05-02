@@ -237,7 +237,7 @@ export default defineConfig(({ mode }): UserConfig => {
     },
 
     esbuild: {
-      drop: isDev ? [] : ["console", "debugger"],
+      // drop: isDev ? [] : ["console", "debugger"],
       legalComments: "none",
     },
 

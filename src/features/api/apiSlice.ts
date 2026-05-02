@@ -22,7 +22,15 @@ import type {
 // ========================================================================
 // API BASE CONFIGURATION
 // ========================================================================
+const baseQueryWithLog = async (args, api, extraOptions) => {
+  console.log("➡️ API REQUEST:", args);
 
+  const result = await baseQuery(args, api, extraOptions);
+
+  console.log("⬅️ API RESPONSE:", result);
+
+  return result;
+};
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api',
   credentials: 'include', // Send cookies (relay_token) with requests
@@ -191,7 +199,7 @@ function mapUser(u: ApiUser): User {
 
 export const api = createApi({
   reducerPath: 'api',
-  baseQuery,
+  baseQuery: baseQueryWithLog,
   tagTypes: [
     'Auth',
     'User',
