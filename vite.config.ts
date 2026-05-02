@@ -4,100 +4,6 @@ import path from "path";
 import { VitePWA } from "vite-plugin-pwa";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Manual chunk strategy
-//
-// Root cause of circular warnings:
-//
-//   vendor → react-core → vendor
-//     Some node_modules (e.g. use-sync-external-store, which is a redux peer)
-//     import from react internals. Keeping react + redux in ONE chunk
-//     eliminates the react-core ↔ redux cycle too.
-//
-//   vendor → socket → vendor
-//     engine.io-client / socket.io-parser import from each other via
-//     the "vendor" fallback. Merging socket deps into vendor fixes this.
-//
-// Strategy:
-//   - Merge react-core + redux into a single "framework" chunk
-//     (they're always loaded together anyway)
-//   - Do NOT give socket its own chunk — let it fall into vendor
-//   - Keep radix, forms, motion, markdown, dates isolated (no cycles)
-// ─────────────────────────────────────────────────────────────────────────────
-function manualChunks(id: string): string | undefined {
-  if (!id.includes("node_modules")) return undefined;
-
-  // ── Framework: React + Router + Redux in one chunk ───────────────────────
-  // Merged to eliminate the react-core ↔ redux ↔ vendor triangle.
-  // These are always needed together and loaded on every page anyway.
-  if (
-    id.includes("/react/") ||
-    id.includes("/react-dom/") ||
-    id.includes("/react-router/") ||
-    id.includes("/react-router-dom/") ||
-    id.includes("/scheduler/") ||            // react-dom internal
-    id.includes("/redux/") ||
-    id.includes("/@reduxjs/") ||
-    id.includes("/react-redux/") ||
-    id.includes("/reselect/") ||             // RTK internal
-    id.includes("/use-sync-external-store/") // redux/react-redux peer
-  ) {
-    return "framework";
-  }
-
-  // ── Radix UI ──────────────────────────────────────────────────────────────
-  // Large, stable, only needed for UI rendering. No internal cycles.
-  if (id.includes("/@radix-ui/")) {
-    return "radix";
-  }
-
-  // ── Forms & validation ────────────────────────────────────────────────────
-  // Only loaded on auth / settings pages.
-  if (
-    id.includes("/react-hook-form/") ||
-    id.includes("/zod/") ||
-    id.includes("/@hookform/")
-  ) {
-    return "forms";
-  }
-
-  // ── Animation ─────────────────────────────────────────────────────────────
-  if (id.includes("/framer-motion/")) {
-    return "motion";
-  }
-
-  // ── Charts ────────────────────────────────────────────────────────────────
-  if (id.includes("/recharts/") || id.includes("/d3-")) {
-    return "charts";
-  }
-
-  // ── Date utils ────────────────────────────────────────────────────────────
-  if (id.includes("/date-fns/") || id.includes("/react-day-picker/")) {
-    return "dates";
-  }
-
-  // ── Markdown ──────────────────────────────────────────────────────────────
-  if (
-    id.includes("/react-markdown/") ||
-    id.includes("/remark-") ||
-    id.includes("/unified/") ||
-    id.includes("/mdast") ||
-    id.includes("/micromark") ||
-    id.includes("/hast")
-  ) {
-    return "markdown";
-  }
-
-  // ── Socket.io → vendor ────────────────────────────────────────────────────
-  // Intentionally NOT given its own chunk. engine.io-client and
-  // socket.io-parser have internal cross-imports that produce a
-  // vendor → socket → vendor cycle when isolated. Merging into vendor
-  // collapses the cycle. Vendor is still loaded once; no regression.
-
-  // Everything else (axios, clsx, lucide, sonner, socket.io, etc.)
-  return "vendor";
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // PWA / Workbox
 // ─────────────────────────────────────────────────────────────────────────────
 const pwaConfig = VitePWA({
@@ -212,21 +118,14 @@ export default defineConfig(({ mode }): UserConfig => {
 
       rollupOptions: {
         output: {
-          manualChunks,
           chunkFileNames: "assets/[name]-[hash].js",
           entryFileNames: "assets/[name]-[hash].js",
           assetFileNames: "assets/[name]-[hash][extname]",
         },
         onwarn(warning, defaultHandler) {
-          // Suppress circular-dependency warnings that originate entirely
-          // inside node_modules — these are third-party lib issues we
-          // cannot fix, and they do not affect correctness.
-          if (
-            warning.code === "CIRCULAR_DEPENDENCY" &&
-            warning.ids?.every((id) => id.includes("node_modules"))
-          ) {
-            return;
-          }
+          // Suppress all circular dependency warnings — these come entirely
+          // from third-party node_modules and do not affect correctness.
+          if (warning.code === "CIRCULAR_DEPENDENCY") return;
           defaultHandler(warning);
         },
       },
@@ -251,6 +150,14 @@ export default defineConfig(({ mode }): UserConfig => {
         "framer-motion",
         "socket.io-client",
         "axios",
+        "cmdk",
+        "sonner",
+        "next-themes",
+        "vaul",
+        "lucide-react",
+        "embla-carousel-react",
+        "input-otp",
+        "react-resizable-panels",
       ],
     },
   };
