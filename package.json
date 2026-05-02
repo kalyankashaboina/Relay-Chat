@@ -13,7 +13,7 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "preview": "vite preview",
     "type-check": "tsc --build",
-   "ci:local": "sh scripts/local-ci-check.sh",
+    "ci:local": "sh scripts/local-ci-check.sh",
     "analyze": "vite build --mode production && npx vite-bundle-visualizer"
   },
   "dependencies": {
@@ -46,6 +46,7 @@
     "@radix-ui/react-toggle-group": "^1.1.10",
     "@radix-ui/react-tooltip": "^1.2.7",
     "@reduxjs/toolkit": "^2.11.2",
+    "@sentry/react": "^10.51.0",
     "axios": "^1.15.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
