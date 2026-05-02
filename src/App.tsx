@@ -34,16 +34,13 @@ function AuthInit() {
   const user = useAppSelector(selectUser);
   const initialized = useAppSelector(selectIsInitialized);
 
-  // Validate session on mount
   useEffect(() => {
     dispatch(initAuth());
   }, [dispatch]);
 
-  // Connect socket when authenticated
   useEffect(() => {
     if (user) {
       socketClient.connect();
-      // BUG FIX #7: Setup WebRTC listeners after socket connection
       webrtcService.setupWebRTCListeners();
     } else {
       socketClient.disconnect();
@@ -123,8 +120,10 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AppRoutes />
-        <SettingsProvider />
+        <ErrorBoundary>
+          <AppRoutes />
+          <SettingsProvider />
+        </ErrorBoundary>
       </BrowserRouter>
     </TooltipProvider>
   </Provider>
