@@ -23,11 +23,11 @@ import type {
 // API BASE CONFIGURATION
 // ========================================================================
 const baseQueryWithLog = async (args, api, extraOptions) => {
-  console.log("➡️ API REQUEST:", args);
+  console.log('➡️ API REQUEST:', args);
 
   const result = await baseQuery(args, api, extraOptions);
 
-  console.log("⬅️ API RESPONSE:", result);
+  console.log('⬅️ API RESPONSE:', result);
 
   return result;
 };
