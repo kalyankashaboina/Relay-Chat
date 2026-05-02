@@ -18,16 +18,32 @@ import type {
   FileAttachment,
   ReplyTo,
 } from '@/features/chat/types';
+import * as Sentry from '@sentry/react';
 
 // ========================================================================
 // API BASE CONFIGURATION
 // ========================================================================
 const baseQueryWithLog = async (args, api, extraOptions) => {
-  console.log('➡️ API REQUEST:', args);
+  Sentry.addBreadcrumb({
+    category: 'rtk-query',
+    message: `➡️ ${args?.method || 'GET'} ${args?.url || args}`,
+    level: 'info',
+    data: { args },
+  });
 
   const result = await baseQuery(args, api, extraOptions);
 
-  console.log('⬅️ API RESPONSE:', result);
+  if (result.error) {
+    Sentry.addBreadcrumb({
+      category: 'rtk-query',
+      message: `❌ ${args?.url || args} failed`,
+      level: 'error',
+      data: { error: result.error },
+    });
+    Sentry.captureException(new Error(`RTK Query Error: ${args?.url || args}`), {
+      extra: { error: result.error, args },
+    });
+  }
 
   return result;
 };

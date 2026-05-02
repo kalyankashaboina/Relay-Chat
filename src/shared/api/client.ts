@@ -18,7 +18,19 @@ export const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => config,
+  (config: InternalAxiosRequestConfig) => {
+    Sentry.addBreadcrumb({
+      category: 'http',
+      message: `➡️ ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`,
+      level: 'info',
+      data: {
+        withCredentials: config.withCredentials,
+        headers: config.headers,
+        baseURL: config.baseURL,
+      },
+    });
+    return config;
+  },
   (error) => {
     Sentry.captureException(error);
     return Promise.reject(error);
@@ -26,26 +38,53 @@ apiClient.interceptors.request.use(
 );
 
 apiClient.interceptors.response.use(
-  (response: AxiosResponse) => response,
+  (response: AxiosResponse) => {
+    Sentry.addBreadcrumb({
+      category: 'http',
+      message: `⬅️ ${response.status} ${response.config.url}`,
+      level: 'info',
+      data: {
+        status: response.status,
+        headers: response.headers,
+      },
+    });
+    return response;
+  },
   (error: AxiosError) => {
     if (error.response) {
       const status = error.response.status;
+
+      Sentry.addBreadcrumb({
+        category: 'http',
+        message: `❌ ${status} ${error.config?.url}`,
+        level: 'error',
+        data: {
+          status,
+          url: error.config?.url,
+          baseURL: error.config?.baseURL,
+          withCredentials: error.config?.withCredentials,
+          responseHeaders: error.response.headers,
+          data: error.response.data,
+        },
+      });
+
       if (status === 401 && window.location.pathname !== '/login') {
         window.location.href = '/login';
       }
       if (status === 403) {
-        Sentry.captureException(error, {
-          extra: { data: error.response.data },
-        });
+        Sentry.captureException(error, { extra: { data: error.response.data } });
       }
       if (status >= 500) {
-        Sentry.captureException(error, {
-          extra: { data: error.response.data },
-        });
+        Sentry.captureException(error, { extra: { data: error.response.data } });
       }
     } else if (error.request) {
       Sentry.captureException(error, {
-        extra: { message: error.message },
+        extra: {
+          message: error.message,
+          url: error.config?.url,
+          baseURL: error.config?.baseURL,
+          withCredentials: error.config?.withCredentials,
+        },
       });
     }
     return Promise.reject(error);
