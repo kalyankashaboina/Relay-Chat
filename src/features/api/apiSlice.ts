@@ -32,14 +32,13 @@ const baseQueryWithLog = async (args, api, extraOptions) => {
   return result;
 };
 const baseQuery = fetchBaseQuery({
-baseUrl: (import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000') + '/api',
-  credentials: 'include', 
+  baseUrl: (import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000') + '/api',
+  credentials: 'include',
   prepareHeaders: (headers) => {
     headers.set('Content-Type', 'application/json');
     return headers;
   },
 });
-
 
 interface ApiMessage {
   _id: string;
