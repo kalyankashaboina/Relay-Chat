@@ -1,4 +1,4 @@
-import { api } from '@/lib/apiClient';
+import { api } from '@/shared/api/client';
 import type { Message, Conversation, User } from '@/features/chat/types';
 
 interface ApiMessage {

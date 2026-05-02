@@ -1,4 +1,4 @@
-import { api } from '@/lib/apiClient';
+import { api } from '@/shared/api/client';
 import { STORAGE_KEYS } from '@/config';
 
 // Settings are stored locally + synced to server notification prefs where applicable
