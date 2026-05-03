@@ -204,7 +204,7 @@ export const sendMessageAsync = createAsyncThunk(
           })
         );
       }
-    }, 10000); // 10 second timeout
+    }, 30000); // 30 second timeout
 
     // Upload files if any (update progress per file)
     for (const att of attachments.filter((a) => a.uploadStatus === 'pending')) {
