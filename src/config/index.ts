@@ -1,5 +1,3 @@
-
-
 export const API_BASE_URL = '/api';
 
 export const SOCKET_URL = '/';
@@ -51,7 +49,7 @@ export const SOCKET_EVENTS = {
   MSG_SEND: 'message:send',
   MSG_NEW: 'message:new',
   MSG_SENT: 'message:sent',
-  MSG_CONFIRMED: 'message:confirmed', 
+  MSG_CONFIRMED: 'message:confirmed',
   MSG_DELIVERED: 'message:delivered',
   MSG_READ: 'message:read',
   MSG_DELETE: 'message:delete',
