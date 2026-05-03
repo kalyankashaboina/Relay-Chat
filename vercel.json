@@ -9,7 +9,7 @@
     },
     {
       "src": "^/socket.io/(.*)",
-      "dest": "https://relay-chat-backend-latest.onrender.com/socket.io/$1"
+      "dest": "https://relay-chat-backend-latest.onrender.com/$1"
     },
     {
       "src": "^(?!/api|/socket.io|/assets|/favicon.ico|/manifest.json).*$",
