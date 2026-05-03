@@ -1,5 +1,3 @@
-echo "Running lint..."
+echo "Running lint-staged..."
 
-npm run lint || exit 1
-
-echo "Finished lint"
+npx lint-staged || exit 1
