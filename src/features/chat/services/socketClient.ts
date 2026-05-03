@@ -104,9 +104,10 @@ class RealSocket {
   connect(): void {
     if (this.socket?.connected) return;
 
-    console.log(' Creating socket connection...');
+    console.log('🔌 Creating socket connection...');
 
-    this.socket = io('https://relay-chat-backend-latest.onrender.com', {
+    // BUG FIX: Use SOCKET_URL from config instead of hardcoded URL
+    this.socket = io(SOCKET_URL, {
       withCredentials: true,
       transports: ['websocket', 'polling'],
       reconnection: true,
