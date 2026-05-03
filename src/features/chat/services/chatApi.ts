@@ -238,10 +238,7 @@ export const chatApi = {
     form.append('file', file);
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      xhr.open(
-        'POST',
-        `${API_BASE_URL}/upload`
-      );
+      xhr.open('POST', `${API_BASE_URL}/upload`);
       xhr.withCredentials = true;
       if (onProgress)
         xhr.upload.onprogress = (e) => {
