@@ -1,5 +1,6 @@
 import { api } from '@/shared/api/client';
 import type { Message, Conversation, User } from '@/features/chat/types';
+import { API_BASE_URL } from '@/config';
 
 interface ApiMessage {
   _id: string;
@@ -239,7 +240,7 @@ export const chatApi = {
       const xhr = new XMLHttpRequest();
       xhr.open(
         'POST',
-        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api'}/upload`
+        `${API_BASE_URL}/upload`
       );
       xhr.withCredentials = true;
       if (onProgress)

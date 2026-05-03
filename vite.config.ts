@@ -3,9 +3,6 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { VitePWA } from "vite-plugin-pwa";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PWA / Workbox
-// ─────────────────────────────────────────────────────────────────────────────
 const pwaConfig = VitePWA({
   registerType: "autoUpdate",
   includeAssets: ["favicon.svg", "icon-192.svg", "icon-512.svg"],
@@ -86,17 +83,25 @@ export default defineConfig(({ mode }): UserConfig => {
   const isDev = mode === "development";
 
   return {
-    server: {
-      host: true,
-      port: 5173,
-      strictPort: true,
-      hmr: { overlay: true },
-      // Uncomment to proxy API + socket in dev (avoids CORS):
-      // proxy: {
-      //   "/api":       { target: "http://localhost:3000", changeOrigin: true },
-      //   "/socket.io": { target: "http://localhost:3000", ws: true },
-      // },
+  server: {
+  host: true,
+  port: 5173,
+  strictPort: true,
+  hmr: { overlay: true },
+
+  proxy: {
+    "/api": {
+      target: "http://localhost:4000", 
+      changeOrigin: true,
+      secure: false,
     },
+    "/socket.io": {
+      target: "http://localhost:4000",
+      ws: true,
+      changeOrigin: true,
+    },
+  },
+},
 
     plugins: [
       react(),
@@ -123,8 +128,6 @@ export default defineConfig(({ mode }): UserConfig => {
           assetFileNames: "assets/[name]-[hash][extname]",
         },
         onwarn(warning, defaultHandler) {
-          // Suppress all circular dependency warnings — these come entirely
-          // from third-party node_modules and do not affect correctness.
           if (warning.code === "CIRCULAR_DEPENDENCY") return;
           defaultHandler(warning);
         },

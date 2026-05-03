@@ -19,6 +19,7 @@ import type {
   ReplyTo,
 } from '@/features/chat/types';
 import * as Sentry from '@sentry/react';
+import { API_BASE_URL } from '@/config';
 
 // ========================================================================
 // API BASE CONFIGURATION
@@ -48,7 +49,7 @@ const baseQueryWithLog = async (args, api, extraOptions) => {
   return result;
 };
 const baseQuery = fetchBaseQuery({
-  baseUrl: (import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000') + '/api',
+  baseUrl: API_BASE_URL,
   credentials: 'include',
   prepareHeaders: (headers) => {
     headers.set('Content-Type', 'application/json');
