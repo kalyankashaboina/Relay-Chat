@@ -1,9 +1,8 @@
-// ─── Central config — all env vars accessed here, never inline ─────────────
-// Set these in your .env file at the project root
+
 
 export const API_BASE_URL = '/api';
 
-export const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:4000';
+export const SOCKET_URL = '/';
 
 // Auth cookie name — must match backend AUTH.COOKIE_NAME
 export const AUTH_COOKIE = 'relay_token';
@@ -52,7 +51,7 @@ export const SOCKET_EVENTS = {
   MSG_SEND: 'message:send',
   MSG_NEW: 'message:new',
   MSG_SENT: 'message:sent',
-  MSG_CONFIRMED: 'message:confirmed', // Real ID from queue processor
+  MSG_CONFIRMED: 'message:confirmed', 
   MSG_DELIVERED: 'message:delivered',
   MSG_READ: 'message:read',
   MSG_DELETE: 'message:delete',
