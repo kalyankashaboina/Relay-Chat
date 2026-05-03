@@ -1,12 +1,19 @@
 {
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/:path*",
-      "destination": "https://relay-chat-backend-latest.onrender.com/api/:path*"
+      "handle": "filesystem"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "^/api/(.*)",
+      "dest": "https://relay-chat-backend-latest.onrender.com/api/$1"
+    },
+    {
+      "src": "^/socket.io/(.*)",
+      "dest": "https://relay-chat-backend-latest.onrender.com/socket.io/$1"
+    },
+    {
+      "src": "^(?!/api|/socket.io|/assets|/favicon.ico|/manifest.json).*$",
+      "dest": "/index.html"
     }
   ]
 }
