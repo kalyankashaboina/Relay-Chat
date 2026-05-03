@@ -35,12 +35,12 @@ function AuthInit() {
   const initialized = useAppSelector(selectIsInitialized);
 
   useEffect(() => {
-  dispatch(initAuth());
+    dispatch(initAuth());
   }, [dispatch]);
 
   useEffect(() => {
-  if (user) {
-    socketClient.connect();
+    if (user) {
+      socketClient.connect();
       webrtcService.setupWebRTCListeners();
     } else {
       socketClient.disconnect();
