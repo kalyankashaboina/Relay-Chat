@@ -98,13 +98,13 @@
     "vite": "^7.3.2",
     "vite-plugin-pwa": "^1.2.0"
   },
-  "lint-staged": {
+"lint-staged": {
   "src/**/*.{ts,tsx,js,jsx}": [
     "eslint --fix",
-    "prettier --write ."
+    "prettier --write"
   ],
   "src/**/*.{json,css,md}": [
-    "prettier --write ."
+    "prettier --write"
   ]
 }
 }
