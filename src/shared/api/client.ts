@@ -7,8 +7,6 @@ import axios, {
 import * as Sentry from '@sentry/react';
 import { API_BASE_URL } from '@/config';
 
-
-
 export const apiClient = axios.create({
   baseURL: `${API_BASE_URL}/api`,
   timeout: 30000,
