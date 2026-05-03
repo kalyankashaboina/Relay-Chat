@@ -104,9 +104,11 @@ class RealSocket {
   connect(): void {
     if (this.socket?.connected) return;
 
+    console.log(' Creating socket connection...');
+
     this.socket = io(SOCKET_URL, {
-      withCredentials: true, // sends relay_token cookie
-      transports: ['websocket'],
+      withCredentials: true,
+      transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: 10,
       reconnectionDelay: 1000,
@@ -115,11 +117,14 @@ class RealSocket {
 
     this.socket.on('connect', () => {
       this._connected = true;
+      console.log('SOCKET CONNECTED:', this.socket?.id);
+
       eventLogger.log('SOCKET_CONNECT', { payload: { url: SOCKET_URL } });
       // BUG FIX #9: Notify connection status listeners
       this.connectionListeners.forEach((cb) => cb(true));
     });
-    this.socket.on('disconnect', () => {
+    this.socket.on('disconnect', (reason) => {
+      console.log(' SOCKET DISCONNECTED:', reason);
       this._connected = false;
       eventLogger.log('SOCKET_DISCONNECT');
       // BUG FIX #9: Notify connection status listeners
