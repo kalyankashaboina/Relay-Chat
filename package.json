@@ -101,10 +101,10 @@
   "lint-staged": {
   "src/**/*.{ts,tsx,js,jsx}": [
     "eslint --fix",
-    "prettier --write"
+    "prettier --write ."
   ],
   "src/**/*.{json,css,md}": [
-    "prettier --write"
+    "prettier --write ."
   ]
 }
 }
