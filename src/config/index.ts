@@ -1,6 +1,6 @@
 export const API_BASE_URL = '/api';
 
-export const SOCKET_URL = '/';
+export const SOCKET_URL = 'https://relay-chat-backend-latest.onrender.com';
 
 // Auth cookie name — must match backend AUTH.COOKIE_NAME
 export const AUTH_COOKIE = 'relay_token';
