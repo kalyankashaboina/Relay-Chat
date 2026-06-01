@@ -95,7 +95,7 @@ export function ForwardMessageModal({
         <ScrollArea className="-mx-6 h-[300px] px-6">
           <div className="space-y-1">
             {filteredConversations.map((conv) => {
-              const displayName = conv.isGroup ? conv.groupName : conv.user?.name || 'Unknown';
+              const displayName = (conv.isGroup ? conv.groupName : conv.user?.name) ?? 'Unknown';
               const isSelected = selectedConversation === conv.id;
 
               return (

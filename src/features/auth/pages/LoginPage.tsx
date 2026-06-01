@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { MessageSquare, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLoginMutation } from '@/features/api/apiSlice';
+import { GoogleLoginButton } from '@/features/auth/components/GoogleLoginButton';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { setUser } from '@/features/auth/authSlice';
 import { t } from '@/shared/lib/i18n';
@@ -40,8 +41,9 @@ export default function LoginPage() {
 
       toast.success('Welcome back!');
       navigate('/');
-    } catch (error: any) {
-      const message = error?.data?.message || t('error.generic', language);
+    } catch (error: unknown) {
+      const e = error as { data?: { message?: string } };
+      const message = e?.data?.message || t('error.generic', language);
       toast.error(message);
     }
   };
@@ -125,6 +127,16 @@ export default function LoginPage() {
             )}
           </Button>
         </form>
+
+        <div className="relative my-2">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">or</span>
+          </div>
+        </div>
+        <GoogleLoginButton />
 
         {/* Demo credentials hint */}
         <div className="rounded-lg border border-border bg-card p-4">

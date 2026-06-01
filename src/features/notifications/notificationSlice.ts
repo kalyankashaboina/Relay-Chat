@@ -117,9 +117,9 @@ export const sendPushNotification = createAsyncThunk(
 
       const notification = new Notification(title, {
         body,
-        icon: icon || '/favicon.ico',
+        icon: icon || '/icon-192.svg',
         tag,
-        badge: '/favicon.ico',
+        badge: '/icon-192.svg',
         data,
         silent: !state.notification.preferences.soundEnabled,
       });

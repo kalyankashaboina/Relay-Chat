@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useEffect, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store';
 import { t } from '@/shared/lib/i18n';
-import { eventLogger } from '@/shared/services/eventLogger';
 import {
   sendMessageAsync,
   retryMessageAsync,
@@ -62,7 +61,6 @@ import type {
   CallRecord,
   Message,
 } from '@/features/chat/types';
-import { useAppSelector as useSelector } from '@/store';
 
 export function useChat() {
   const dispatch = useAppDispatch();
@@ -125,14 +123,6 @@ export function useChat() {
     [language]
   );
 
-  useEffect(() => {
-    console.log('[UI] messages updated', {
-      conv: activeConversationId,
-      count: messages.length,
-      last: messages[messages.length - 1],
-    });
-  }, [messages, activeConversationId]);
-
   // ── Socket event listeners ────────────────────────────────────────────────
 
   const activeConvIdRef = useRef(activeConversationId);
@@ -169,14 +159,6 @@ export function useChat() {
           tempId?: string;
         };
 
-        eventLogger.log('MESSAGE_NEW', {
-          messageId: p.id,
-          tempId: p.tempId,
-          conversationId: p.conversationId,
-          userId: p.senderId,
-          payload: { content: p.content },
-        });
-
         const isOwn = p.senderId === currentUserIdRef.current;
 
         const incoming: Message = {
@@ -198,12 +180,6 @@ export function useChat() {
               message: incoming,
             })
           );
-
-          eventLogger.log('MESSAGE_RECEIVED', {
-            messageId: p.id,
-            conversationId: p.conversationId,
-            userId: p.senderId,
-          });
         }
 
         // ❌ DO NOT call confirmMessage here
@@ -215,11 +191,6 @@ export function useChat() {
           conversationId: string;
           createdAt: string;
         };
-        eventLogger.log('MESSAGE_SENT', {
-          tempId: p.tempId,
-          messageId: p.messageId,
-          conversationId: p.conversationId,
-        });
         dispatch(
           confirmMessage({
             conversationId: p.conversationId,
@@ -238,11 +209,6 @@ export function useChat() {
           conversationId: string;
           createdAt: string;
         };
-        eventLogger.log('MESSAGE_CONFIRMED', {
-          tempId: p.tempId,
-          messageId: p.realId,
-          conversationId: p.conversationId,
-        });
         dispatch(
           confirmMessage({
             conversationId: p.conversationId,
@@ -255,10 +221,6 @@ export function useChat() {
 
       socketClient.on('message:delivered', (e) => {
         const p = e.payload as { messageId: string; conversationId: string };
-        eventLogger.log('MESSAGE_DELIVERED', {
-          messageId: p.messageId,
-          conversationId: p.conversationId,
-        });
         if (p.conversationId)
           dispatch(
             updateMessageStatus({
@@ -270,10 +232,6 @@ export function useChat() {
       }),
       socketClient.on('message:read', (e) => {
         const p = e.payload as { conversationId: string; messageIds: string[] };
-        eventLogger.log('MESSAGE_READ', {
-          conversationId: p.conversationId,
-          payload: { messageIds: p.messageIds },
-        });
         p.messageIds?.forEach((mid) =>
           dispatch(
             updateMessageStatus({
@@ -287,27 +245,15 @@ export function useChat() {
       socketClient.on('message:failed', (e) => {
         // BUG FIX #3: Use conversationId from payload, not activeConvIdRef
         const p = e.payload as { tempId: string; conversationId?: string; reason?: string };
-        const convId = p.conversationId || activeConvIdRef.current;
-        eventLogger.log('MESSAGE_FAILED', {
-          tempId: p.tempId,
-          conversationId: convId,
-          error: p.reason,
-        });
+        const convId = p.conversationId ?? activeConvIdRef.current ?? undefined;
         if (convId && p.tempId) {
           dispatch(
             updateMessageStatus({ conversationId: convId, messageId: p.tempId, status: 'failed' })
           );
-          if (p.reason) {
-            console.error(`Message failed: ${p.reason}`);
-          }
         }
       }),
       socketClient.on('message:deleted', (e) => {
         const p = e.payload as { messageId: string; conversationId: string };
-        eventLogger.log('MESSAGE_DELETED', {
-          messageId: p.messageId,
-          conversationId: p.conversationId,
-        });
         dispatch(applyRemoteDelete({ conversationId: p.conversationId, messageId: p.messageId }));
       }),
       socketClient.on('message:edited', (e) => {
@@ -317,11 +263,6 @@ export function useChat() {
           content: string;
           editedAt: string;
         };
-        eventLogger.log('MESSAGE_EDITED', {
-          messageId: p.messageId,
-          conversationId: p.conversationId,
-          payload: { content: p.content },
-        });
         dispatch(
           applyRemoteEdit({
             conversationId: p.conversationId,
@@ -341,12 +282,6 @@ export function useChat() {
           userId: string;
           username: string;
         };
-        eventLogger.log('REACTION_ADDED', {
-          messageId: p.messageId,
-          conversationId: p.conversationId,
-          userId: p.userId,
-          payload: { emoji: p.emoji },
-        });
         dispatch(applyRemoteReaction({ ...p, added: true }));
       }),
       socketClient.on('reaction:removed', (e) => {
@@ -357,30 +292,16 @@ export function useChat() {
           userId: string;
           username: string;
         };
-        eventLogger.log('REACTION_REMOVED', {
-          messageId: p.messageId,
-          conversationId: p.conversationId,
-          userId: p.userId,
-          payload: { emoji: p.emoji },
-        });
         dispatch(applyRemoteReaction({ ...p, added: false }));
       }),
 
       // Typing - BUG FIX #8: Use per-conversation typing state
       socketClient.on('typing:start', (e) => {
         const p = e.payload as { conversationId: string; userName: string };
-        eventLogger.log('TYPING_START', {
-          conversationId: p.conversationId,
-          payload: { userName: p.userName },
-        });
         dispatch(addTypingUser({ conversationId: p.conversationId, username: p.userName }));
       }),
       socketClient.on('typing:stop', (e) => {
         const p = e.payload as { conversationId: string; userName: string };
-        eventLogger.log('TYPING_STOP', {
-          conversationId: p.conversationId,
-          payload: { userName: p.userName },
-        });
         dispatch(removeTypingUser({ conversationId: p.conversationId, username: p.userName }));
       }),
 
@@ -390,41 +311,20 @@ export function useChat() {
       }),
 
       // BUG FIX #6: Call event listeners
-      socketClient.on('call:incoming', (e) => {
-        const p = e.payload as {
-          fromUserId: string;
-          callType: 'audio' | 'video';
-          offer: RTCSessionDescriptionInit;
-        };
-        eventLogger.log('CALL_INCOMING', {
-          userId: p.fromUserId,
-          payload: { callType: p.callType },
-        });
-        console.log('Incoming call from:', p.fromUserId, p.callType);
-        // TODO: Show incoming call UI, integrate with CallOverlay
-        // For now, just log it - UI integration needed in CallOverlay component
+      socketClient.on('call:incoming', (_e) => {
+        /* handled by CallOverlay */
       }),
-      socketClient.on('call:accepted', (e) => {
-        const p = e.payload as { userId: string };
-        eventLogger.log('CALL_ACCEPTED', { userId: p.userId });
-        console.log('Call accepted by:', p.userId);
-        // TODO: Transition to connected state in CallOverlay
+      socketClient.on('call:accepted', (_e) => {
+        /* handled by CallOverlay */
       }),
-      socketClient.on('call:rejected', (e) => {
-        const p = e.payload as { userId: string; reason?: string };
-        eventLogger.log('CALL_REJECTED', { userId: p.userId, error: p.reason });
-        console.log('Call rejected by:', p.userId, p.reason);
-        // TODO: Show toast and cleanup in CallOverlay
+      socketClient.on('call:rejected', (_e) => {
+        /* handled by CallOverlay */
       }),
-      socketClient.on('call:ended', (e) => {
-        const p = e.payload as { userId: string };
-        eventLogger.log('CALL_ENDED', { userId: p.userId });
-        console.log('Call ended by:', p.userId);
-        // TODO: Cleanup call state in CallOverlay
+      socketClient.on('call:ended', (_e) => {
+        /* handled by CallOverlay */
       }),
       socketClient.on('call:busy', (e) => {
         const p = e.payload as { userId: string };
-        eventLogger.log('CALL_INCOMING', { userId: p.userId, payload: { busy: true } });
         console.log('User is busy:', p.userId);
         // TODO: Show "user is busy" toast
       }),

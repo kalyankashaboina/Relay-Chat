@@ -74,8 +74,8 @@ export function useServiceWorker() {
       if (permission === 'granted' && state.registration) {
         // vibrate is supported but not in TypeScript's type definition
         const notificationOptions = {
-          icon: '/placeholder.svg',
-          badge: '/placeholder.svg',
+          icon: '/icon-192.svg',
+          badge: '/icon-192.svg',
           ...options,
         };
         state.registration.showNotification(title, notificationOptions);

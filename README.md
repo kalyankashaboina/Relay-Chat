@@ -1,143 +1,94 @@
-# 🎨 Relay Chat - Frontend
+# Relay Chat — Frontend
 
-![React](https://img.shields.io/badge/React-18.3.1-blue)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.6.2-blue)
-![Status](https://img.shields.io/badge/status-production--ready-green)
+React + TypeScript + Redux Toolkit frontend for Relay Chat.
 
-Modern, real-time chat application frontend built with React 18, TypeScript, Redux Toolkit, Socket.IO, and WebRTC.
+## Stack
 
----
+| Layer | Tech |
+|---|---|
+| Framework | React 18 + Vite |
+| State | Redux Toolkit + RTK Query |
+| Realtime | Socket.IO client |
+| UI | Tailwind CSS + shadcn/ui |
+| Validation | Zod |
+| Routing | React Router v6 |
+| HTTP | Axios (cookie-based auth) |
+| Monitoring | Sentry (optional) |
 
-## ✨ Features
+## Features
 
-- 🔄 Real-time messaging via WebSocket
-- 📹 Video/audio calling with WebRTC
-- 💬 Typing indicators & read receipts
-- 😀 Message reactions
-- 👥 Group chats
-- 📎 File uploads
-- 🌓 Dark/Light theme
-- 📱 Mobile responsive
-- ⚡ PWA support
+- **Chat** — single and group chat, typing indicators, read receipts
+- **Media sharing** — images, video, audio, documents (25 MB)
+- **Voice messages** — in-browser recording + waveform playback
+- **Reactions** — emoji reactions on messages
+- **Vanish mode** — timer-based disappearing messages
+- **Scheduled messages** — create future messages
+- **Message actions** — edit, delete, reply, forward, star, pin
+- **Audio / video calls** — WebRTC via Socket.IO signalling
+- **Profile** — avatar, bio, privacy, notification settings
+- **Dark / light theme**
+- **Offline queue** — sends queued messages when connection resumes
 
----
-
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
-# Install dependencies
-npm install --legacy-peer-deps
-
-# Configure environment
 cp .env.example .env
-# Edit .env with your backend URL
+# Set VITE_API_BASE_URL to your backend URL
 
-# Start development server
+npm install
 npm run dev
 ```
 
-Access at: `http://localhost:5173`
+Dev: `http://localhost:5173`
 
----
+## Scripts
 
-## 📋 Prerequisites
+| Command | Purpose |
+|---|---|
+| `npm run dev` | Vite dev server |
+| `npm run build` | Production build |
+| `npm run lint` | ESLint (0 errors required) |
+| `npm run format` | Prettier |
+| `npm run type-check` | tsc --noEmit |
+| `npm run preview` | Preview production build |
 
-- Node.js v18+
-- Backend API running (see backend repository)
-
----
-
-## ⚙️ Environment Variables
-
-Create `.env` file:
-
-```env
-VITE_API_BASE_URL=http://localhost:4000
-VITE_APP_NAME=Relay Chat
-VITE_APP_VERSION=1.1.0
-```
-
----
-
-## 📜 Scripts
-
-```bash
-npm run dev          # Start dev server
-npm run build        # Build for production
-npm run preview      # Preview production build
-npm run lint         # Run ESLint
-npm run type-check   # TypeScript validation
-```
-
----
-
-## 🛠 Tech Stack
-
-- React 18 + TypeScript
-- Redux Toolkit
-- Socket.IO Client
-- WebRTC
-- Tailwind CSS + shadcn/ui
-- Framer Motion
-- React Router
-- Axios
-
----
-
-## 📁 Structure
+## Architecture
 
 ```
 src/
-├── features/         # Feature modules (auth, chat, settings)
-├── components/       # Shared UI components
-├── shared/          # Utils, hooks, constants
-├── store/           # Redux store
-├── config/          # Configuration
-└── App.tsx          # Root component
+├── components/
+│   ├── common/      Avatar, EmptyState, LoadingSpinner, ErrorState
+│   └── ui/          shadcn/ui primitives
+├── config/          API URL, socket URL, constants (SOCKET_EVENTS, UPLOAD limits)
+├── features/
+│   ├── api/         RTK Query base API slice
+│   ├── auth/        login, register, forgot password, authSlice, useAuth hook
+│   ├── chat/
+│   │   ├── components/  ChatLayout, ChatWindow, MessageBubble, MessageInput, ...
+│   │   ├── services/    socketClient, chatApi, fileUpload, voiceRecorder, webRTC
+│   │   ├── chatSlice.ts Redux slice (messages, conversations, presence)
+│   │   ├── useChat.ts   Main chat hook
+│   │   └── types.ts     All shared TypeScript types
+│   ├── notifications/ Redux slice
+│   ├── profile/     Profile screens
+│   └── settings/    Theme, font, language, notification settings
+├── pages/           Index, NotFound
+├── shared/
+│   ├── api/         Axios client (withCredentials)
+│   ├── hooks/       useSocket, useInfiniteScroll, useDraft, useNotifications, ...
+│   ├── lib/         chatUtils, i18n, utils
+│   └── utils/       format, validation
+└── store/           Redux store + uiSlice
 ```
 
----
+## Cookie Auth
 
-## 🚀 Deployment
+All API calls use `withCredentials: true`. The backend sets an `HttpOnly` cookie (`relay_token`) on login — no token storage in localStorage needed.
 
-### Build
+## Environment Variables
 
-```bash
-npm run build
-```
-
-### Deploy to
-
-- **Vercel** (recommended): `vercel --prod`
-- **Netlify**: `netlify deploy --prod`
-- **Cloudflare Pages**: Connect GitHub repo
-
----
-
-## 🔌 Socket Events
-
-**Listening:** presence:init, user:online, user:offline, message:new, message:sent, message:confirmed, message:delivered, message:read, typing:start, typing:stop, call:incoming, call:accepted, webrtc:offer, etc.
-
-**Emitting:** message:send, typing:start, typing:stop, call:initiate, call:accept, webrtc:offer, etc.
-
-See full list in `/src/config/index.ts`
-
----
-
-## 🐛 Troubleshooting
-
-**Install fails:** Use `npm install --legacy-peer-deps`
-
-**WebSocket fails:** Check `VITE_API_BASE_URL` and backend CORS
-
-**Build fails:** Run `npm run type-check` to see errors
-
----
-
-## 📝 License
-
-MIT License
-
----
-
-**Built with ❤️ using React, TypeScript, and WebRTC**
+| Variable | Description |
+|---|---|
+| `VITE_API_BASE_URL` | Backend URL (e.g. `http://localhost:4000`) |
+| `VITE_SOCKET_URL` | Socket URL (defaults to `VITE_API_BASE_URL`) |
+| `VITE_SENTRY_DSN` | Optional — Sentry error tracking |
