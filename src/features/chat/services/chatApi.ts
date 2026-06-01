@@ -138,7 +138,7 @@ export const chatApi = {
 
   async searchConversations(query: string): Promise<Conversation[]> {
     const res = await api.get<{ conversations: ApiConversation[] }>(
-      `/conversations/search?query=${encodeURIComponent(query)}`
+      `/conversations/search?q=${encodeURIComponent(query)}`
     );
     return res.conversations.map(mapConversation);
   },

@@ -1,6 +1,15 @@
-export const API_BASE_URL = '/api';
+// ─────────────────────────────────────────────────────────────────────────────
+// config/index.ts — All app-level constants. No hardcoded values.
+// ─────────────────────────────────────────────────────────────────────────────
 
-export const SOCKET_URL = 'https://relay-chat-backend-latest.onrender.com';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+  ? `${import.meta.env.VITE_API_BASE_URL as string}/api`
+  : '/api';
+
+export const SOCKET_URL =
+  (import.meta.env.VITE_SOCKET_URL as string | undefined) ??
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
+  '';
 
 // Auth cookie name — must match backend AUTH.COOKIE_NAME
 export const AUTH_COOKIE = 'relay_token';
@@ -19,7 +28,7 @@ export const STORAGE_KEYS = {
   NOTIF_PREFS: 'notification_preferences',
 } as const;
 
-// File upload limits (keep in sync with BE)
+// File upload limits (keep in sync with BE UPLOAD constant)
 export const UPLOAD = {
   MAX_SIZE_BYTES: 25 * 1024 * 1024,
   ALLOWED_MIMES: [
@@ -40,7 +49,7 @@ export const UPLOAD = {
   ] as string[],
 } as const;
 
-// Socket event names — mirror backend SOCKET_EVENTS
+// Socket event names — mirror backend SOCKET_EVENTS constant
 export const SOCKET_EVENTS = {
   PRESENCE_INIT: 'presence:init',
   USER_ONLINE: 'user:online',
@@ -83,3 +92,5 @@ export const SOCKET_EVENTS = {
   WEBRTC_ANSWER: 'webrtc:answer',
   WEBRTC_ICE: 'webrtc:ice',
 } as const;
+
+export const GOOGLE_CLIENT_ID = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined) ?? '';

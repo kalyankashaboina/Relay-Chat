@@ -248,13 +248,11 @@ class WebRTCService {
       if (event.candidate && this.callState.remoteUserId) {
         // Send ICE candidate via Socket.IO for NAT traversal
         socketClient.sendICECandidate(this.callState.remoteUserId, event.candidate.toJSON());
-        console.log('ICE candidate sent to peer');
       }
     };
 
     // Handle remote stream
     this.peerConnection.ontrack = (event) => {
-      console.log('Received remote stream');
       this.remoteStream = event.streams[0];
       this.callState.remoteStream = this.remoteStream;
 
@@ -268,8 +266,6 @@ class WebRTCService {
 
     // Handle connection state changes
     this.peerConnection.onconnectionstatechange = () => {
-      console.log('Connection state:', this.peerConnection?.connectionState);
-
       if (
         this.peerConnection?.connectionState === 'disconnected' ||
         this.peerConnection?.connectionState === 'failed'
@@ -279,9 +275,7 @@ class WebRTCService {
     };
 
     // Handle ICE connection state
-    this.peerConnection.oniceconnectionstatechange = () => {
-      console.log('ICE connection state:', this.peerConnection?.iceConnectionState);
-    };
+    this.peerConnection.oniceconnectionstatechange = () => {};
   }
 
   /**
@@ -340,7 +334,6 @@ class WebRTCService {
         fromUserId: string;
         offer: RTCSessionDescriptionInit;
       };
-      console.log('Received WebRTC offer from:', fromUserId);
 
       if (!this.peerConnection) {
         console.error('No peer connection to handle offer');
@@ -354,7 +347,6 @@ class WebRTCService {
 
         // Send answer back
         socketClient.sendWebRTCAnswer(fromUserId, answer);
-        console.log('Sent WebRTC answer to:', fromUserId);
       } catch (error) {
         console.error('Failed to handle WebRTC offer:', error);
       }
@@ -366,7 +358,6 @@ class WebRTCService {
         fromUserId: string;
         answer: RTCSessionDescriptionInit;
       };
-      console.log('Received WebRTC answer from:', fromUserId);
 
       if (!this.peerConnection) {
         console.error('No peer connection to handle answer');
@@ -375,7 +366,6 @@ class WebRTCService {
 
       try {
         await this.peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-        console.log('Set remote description successfully');
       } catch (error) {
         console.error('Failed to handle WebRTC answer:', error);
       }
@@ -387,7 +377,6 @@ class WebRTCService {
         fromUserId: string;
         candidate: RTCIceCandidateInit;
       };
-      console.log('Received ICE candidate from:', fromUserId);
 
       if (!this.peerConnection) {
         console.error('No peer connection to add ICE candidate');
@@ -396,7 +385,6 @@ class WebRTCService {
 
       try {
         await this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-        console.log('Added ICE candidate successfully');
       } catch (error) {
         console.error('Failed to add ICE candidate:', error);
       }

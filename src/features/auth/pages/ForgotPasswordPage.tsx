@@ -29,8 +29,9 @@ export default function ForgotPasswordPage() {
     try {
       await forgotPassword({ email: parsed.data.email }).unwrap();
       setIsSubmitted(true);
-    } catch (error: any) {
-      const message = error?.data?.message || t('error.generic', language);
+    } catch (error: unknown) {
+      const e = error as { data?: { message?: string } };
+      const message = e?.data?.message || t('error.generic', language);
       toast.error(message);
     }
   };

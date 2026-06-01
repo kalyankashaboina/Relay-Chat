@@ -1,78 +1,66 @@
 import { api } from '@/shared/api/client';
 import type { AuthUser } from '@/features/chat/types';
 
-export interface AuthResult {
-  success: boolean;
-  user?: AuthUser;
-  error?: string;
-}
-
-interface MeResponse {
-  _id: string;
-  id?: string;
-  username: string;
+interface ApiUser {
+  id: string;
   email: string;
+  name: string;
   avatar?: string;
+  bio?: string;
+  isEmailVerified?: boolean;
+  provider?: string;
 }
 
-function mapUser(u: MeResponse): AuthUser {
+interface AuthApiResponse {
+  success: boolean;
+  data: ApiUser;
+}
+
+function toAuthUser(u: ApiUser): AuthUser {
   return {
-    id: u._id || u.id || '',
+    id: u.id,
     email: u.email,
-    name: u.username,
-    avatar: u.avatar || '',
+    name: u.name,
+    avatar: u.avatar ?? '',
   };
 }
 
+function extractErrorMessage(err: unknown): string {
+  const e = err as { response?: { data?: { message?: string } }; message?: string };
+  return e?.response?.data?.message ?? e?.message ?? 'Something went wrong';
+}
+
 export const authService = {
-  async login(email: string, password: string): Promise<AuthResult> {
-    try {
-      const res = await api.post<{ success: boolean; data: MeResponse }>('/auth/login', {
-        email,
-        password,
-      });
-      return { success: true, user: mapUser(res.data) };
-    } catch (err: unknown) {
-      return { success: false, error: (err as Error).message };
-    }
+  async login(email: string, password: string): Promise<AuthUser | null> {
+    const res = await api.post<AuthApiResponse>('/auth/login', { email, password });
+    return toAuthUser(res.data);
   },
 
-  async register(name: string, email: string, password: string): Promise<AuthResult> {
-    try {
-      const res = await api.post<{ success: boolean; data: MeResponse }>('/auth/register', {
-        username: name,
-        email,
-        password,
-      });
-      return { success: true, user: mapUser(res.data) };
-    } catch (err: unknown) {
-      return { success: false, error: (err as Error).message };
-    }
+  async register(username: string, email: string, password: string): Promise<AuthUser | null> {
+    const res = await api.post<AuthApiResponse>('/auth/register', { username, email, password });
+    return toAuthUser(res.data);
   },
 
-  async forgotPassword(email: string): Promise<AuthResult> {
-    try {
-      await api.post('/auth/forgot-password', { email });
-      return { success: true };
-    } catch (err: unknown) {
-      return { success: false, error: (err as Error).message };
-    }
+  async forgotPassword(email: string): Promise<void> {
+    await api.post('/auth/forgot-password', { email });
   },
 
   async logout(): Promise<void> {
     try {
       await api.post('/auth/logout');
     } catch {
-      // ignore
+      // Server-side session already invalid — ignore
     }
   },
 
   async getMe(): Promise<AuthUser | null> {
     try {
-      const res = await api.get<{ data: MeResponse }>('/auth/me');
-      return mapUser(res.data);
+      const res = await api.get<AuthApiResponse>('/auth/me');
+      return toAuthUser(res.data);
     } catch {
       return null;
     }
   },
+
+  extractErrorMessage,
 };
