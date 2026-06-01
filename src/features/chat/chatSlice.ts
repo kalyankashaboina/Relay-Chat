@@ -18,7 +18,6 @@ import {
 } from '@/features/chat/services/messageService';
 import { chatApi } from '@/features/chat/services/chatApi';
 import { socketClient } from '@/features/chat/services/socketClient';
-import { eventLogger } from '@/shared/services/eventLogger';
 import { t } from '@/shared/lib/i18n';
 
 // ── State ─────────────────────────────────────────────────────────────────────
@@ -71,19 +70,15 @@ const initialState: ChatState = {
 
 // ── Thunks ────────────────────────────────────────────────────────────────────
 
-export const fetchConversations = createAsyncThunk(
-  'chat/fetchConversations',
-  async (_, { getState }) => {
-    const state = (getState() as { chat: ChatState }).chat;
-    return chatApi.getConversations(undefined);
-  }
+export const fetchConversations = createAsyncThunk('chat/fetchConversations', async () =>
+  chatApi.getConversations(undefined)
 );
 
 export const fetchMessages = createAsyncThunk(
   'chat/fetchMessages',
   async ({ conversationId }: { conversationId: string }, { getState }) => {
-    const state = (getState() as { chat: ChatState }).chat;
-    const result = await chatApi.getMessages(conversationId, undefined, state.currentUserId);
+    const { currentUserId } = (getState() as { chat: ChatState }).chat;
+    const result = await chatApi.getMessages(conversationId, undefined, currentUserId);
     return { conversationId, ...result };
   }
 );
@@ -147,21 +142,10 @@ export const sendMessageAsync = createAsyncThunk(
       replyTo: state.replyingTo || undefined,
     };
 
-    eventLogger.log('MESSAGE_SEND', {
-      tempId,
-      conversationId: convId,
-      payload: { content, hasAttachments: attachments.length > 0, isVanish },
-    });
-
     dispatch(addOwnMessage({ conversationId: convId, message: optimistic }));
     dispatch(setReplyingTo(null));
 
     if (!state.isOnline) {
-      eventLogger.log('OFFLINE_QUEUE_PROCESS', {
-        tempId,
-        conversationId: convId,
-        payload: { reason: 'offline' },
-      });
       dispatch(
         enqueueItem({
           id: `q-${tempId}`,
@@ -182,40 +166,42 @@ export const sendMessageAsync = createAsyncThunk(
       conversationId: convId,
       content,
       tempId,
-      replyTo: state.replyingTo,
+      ...(state.replyingTo ? { replyTo: state.replyingTo } : {}),
     });
-
+    console.log('THUNK', {
+      conversationId: convId,
+      content,
+      tempId,
+      ...(state.replyingTo ? { replyTo: state.replyingTo } : {}),
+    });
+    // Mark failed only if still pending after 30s AND socket is still connected.
+    // confirmMessage clears 'pending' → this timeout is a safety net only.
     setTimeout(() => {
       const currentState = (getState() as { chat: ChatState }).chat;
       const msgs = currentState.messagesMap[convId] || [];
       const msg = msgs.find((m) => m.id === tempId);
-      // If message still pending after 10 seconds, mark as failed
-      if (msg && msg.status === 'pending') {
-        eventLogger.log('MESSAGE_FAILED', {
-          tempId,
-          conversationId: convId,
-          error: 'Message timeout - no confirmation after 10s',
-        });
+      const stillPending = msg && msg.status === 'pending';
+      const connected = socketClient.getConnectionStatus();
+      if (stillPending && !connected) {
         dispatch(
-          updateMessageStatus({
-            conversationId: convId,
-            messageId: tempId,
-            status: 'failed',
-          })
+          updateMessageStatus({ conversationId: convId, messageId: tempId, status: 'failed' })
         );
+      } else if (stillPending && connected) {
+        // Socket is up but no confirmation — likely a dropped event, retry once
+        socketClient.sendMessage({
+          conversationId: convId,
+          content,
+          tempId,
+          ...(state.replyingTo ? { replyTo: state.replyingTo } : {}),
+        });
       }
-    }, 30000); // 30 second timeout
+    }, 30000);
 
     // Upload files if any (update progress per file)
     for (const att of attachments.filter((a) => a.uploadStatus === 'pending')) {
       const rawFile = (files || []).find((f) => f.name === att.name);
       if (!rawFile) continue;
       try {
-        eventLogger.log('FILE_UPLOAD_START', {
-          messageId: tempId,
-          conversationId: convId,
-          payload: { fileName: att.name, fileSize: att.size },
-        });
         dispatch(
           updateAttachmentProgress({
             conversationId: convId,
@@ -225,11 +211,6 @@ export const sendMessageAsync = createAsyncThunk(
           })
         );
         const uploaded = await chatApi.uploadFile(rawFile, (pct) => {
-          eventLogger.log('FILE_UPLOAD_PROGRESS', {
-            messageId: tempId,
-            conversationId: convId,
-            payload: { fileName: att.name, progress: pct },
-          });
           dispatch(
             updateAttachmentProgress({
               conversationId: convId,
@@ -238,11 +219,6 @@ export const sendMessageAsync = createAsyncThunk(
               progress: pct,
             })
           );
-        });
-        eventLogger.log('FILE_UPLOAD_COMPLETE', {
-          messageId: tempId,
-          conversationId: convId,
-          payload: { fileName: att.name, url: uploaded },
         });
         dispatch(
           updateAttachmentStatus({
@@ -255,12 +231,6 @@ export const sendMessageAsync = createAsyncThunk(
         );
         // TODO: include uploaded URL in message via socket
       } catch (error) {
-        eventLogger.log('FILE_UPLOAD_FAILED', {
-          messageId: tempId,
-          conversationId: convId,
-          error: String(error),
-          payload: { fileName: att.name },
-        });
         dispatch(
           updateAttachmentStatus({
             conversationId: convId,
@@ -311,7 +281,7 @@ export const retryMessageAsync = createAsyncThunk(
     const state = (getState() as { chat: ChatState }).chat;
 
     // BUG FIX #12: Search all conversations, not just active one
-    let foundConvId = state.activeConversationId;
+    let foundConvId: string | undefined = state.activeConversationId ?? undefined;
     let msg = state.activeConversationId
       ? (state.messagesMap[state.activeConversationId] || []).find((m) => m.id === messageId)
       : undefined;
@@ -329,19 +299,8 @@ export const retryMessageAsync = createAsyncThunk(
     }
 
     if (!msg || !foundConvId || !state.isOnline) {
-      eventLogger.log('OFFLINE_QUEUE_RETRY', {
-        messageId,
-        conversationId: foundConvId,
-        error: !state.isOnline ? 'offline' : 'message_not_found',
-      });
       return;
     }
-
-    eventLogger.log('OFFLINE_QUEUE_RETRY', {
-      messageId,
-      conversationId: foundConvId,
-      payload: { content: msg.content },
-    });
 
     dispatch(resetMessageForRetry({ conversationId: foundConvId, messageId }));
     socketClient.sendMessage({
@@ -449,11 +408,6 @@ const chatSlice = createSlice({
     },
 
     addOwnMessage: (s, a: PayloadAction<{ conversationId: string; message: Message }>) => {
-      console.log('[REDUCER] addOwnMessage', {
-        conv: a.payload.conversationId,
-        id: a.payload.message.id,
-        status: a.payload.message.status,
-      });
       const { conversationId, message } = a.payload;
       if (!s.messagesMap[conversationId]) s.messagesMap[conversationId] = [];
       s.messagesMap[conversationId].push(message);
@@ -510,11 +464,6 @@ const chatSlice = createSlice({
         }
 
         msg.timestamp = createdAt; // or new Date(createdAt)
-        console.log('[REDUCER] confirm START', {
-          conv: conversationId,
-          tempId,
-          realId,
-        });
         // remove duplicate real message if exists
         if (realIndex !== -1 && realIndex !== tempIndex) {
           msgs.splice(realIndex, 1);
@@ -538,18 +487,12 @@ const chatSlice = createSlice({
         return;
       }
 
-      // ❌ DO NOT inject fake message
-      console.warn('confirmMessage fallback hit', a.payload);
+      // tempId not found and real id not found — message already handled
     },
     updateMessageStatus: (
       s,
       a: PayloadAction<{ conversationId: string; messageId: string; status: Message['status'] }>
     ) => {
-      console.log('[REDUCER] updateMessageStatus', {
-        conv: a.payload.conversationId,
-        id: a.payload.messageId,
-        status: a.payload.status,
-      });
       const msgs = s.messagesMap[a.payload.conversationId];
       if (msgs) {
         const m = msgs.find((m) => m.id === a.payload.messageId);

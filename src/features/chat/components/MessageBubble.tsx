@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { Message } from '@/features/chat/types';
 import { useChat } from '@/features/chat/useChat';
 import { FileAttachmentPreview } from './FileAttachmentPreview';
@@ -47,7 +47,7 @@ interface MessageBubbleProps {
   onEdit?: (message: Message) => void;
 }
 
-export function MessageBubble({ message, onEdit }: MessageBubbleProps) {
+export const MessageBubble = memo(function MessageBubble({ message, onEdit }: MessageBubbleProps) {
   const {
     retryMessage,
     deleteMessage,
@@ -94,12 +94,7 @@ export function MessageBubble({ message, onEdit }: MessageBubbleProps) {
 
   if (message.isDeleted) {
     return (
-      <div
-        className={cn(
-          'animate-slide-up group flex w-full',
-          message.isOwn ? 'justify-end' : 'justify-start'
-        )}
-      >
+      <div className={cn('group flex w-full', message.isOwn ? 'justify-end' : 'justify-start')}>
         <div
           className={cn(
             'rounded-2xl border border-dashed border-muted-foreground/20 bg-muted/30 px-4 py-2.5 italic text-muted-foreground/70',
@@ -115,10 +110,7 @@ export function MessageBubble({ message, onEdit }: MessageBubbleProps) {
   return (
     <>
       <div
-        className={cn(
-          'animate-slide-up group flex w-full px-1',
-          message.isOwn ? 'justify-end' : 'justify-start'
-        )}
+        className={cn('group flex w-full px-1', message.isOwn ? 'justify-end' : 'justify-start')}
       >
         <div
           className={cn(
@@ -362,4 +354,4 @@ export function MessageBubble({ message, onEdit }: MessageBubbleProps) {
       </AlertDialog>
     </>
   );
-}
+});

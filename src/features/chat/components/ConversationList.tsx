@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState, useCallback } from 'react';
 import { useChat } from '@/features/chat/useChat';
 import { Conversation } from '@/features/chat/types';
 import { cn } from '@/lib/utils';
@@ -11,12 +11,12 @@ import { motion } from 'framer-motion';
 
 import { getInitials, getAvatarColor } from '@/shared/lib/chatUtils';
 
-function formatTime(date?: Date): string {
+const formatTime = (date?: Date): string => {
   if (!date) return '';
   if (isToday(date)) return format(date, 'HH:mm');
   if (isYesterday(date)) return 'Yesterday';
   return format(date, 'MMM d');
-}
+};
 
 interface ConversationItemProps {
   conversation: Conversation;
@@ -49,7 +49,7 @@ function TypingDots() {
   );
 }
 
-function ConversationItem({
+const ConversationItem = memo(function ConversationItem({
   conversation,
   isActive,
   onClick,
@@ -164,7 +164,7 @@ function ConversationItem({
       </div>
     </div>
   );
-}
+});
 
 export function ConversationList() {
   const {

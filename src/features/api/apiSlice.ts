@@ -24,10 +24,24 @@ import { API_BASE_URL } from '@/config';
 // ========================================================================
 // API BASE CONFIGURATION
 // ========================================================================
-const baseQueryWithLog = async (args, api, extraOptions) => {
+import type {
+  BaseQueryFn,
+  FetchArgs,
+  FetchBaseQueryError,
+  FetchBaseQueryMeta,
+} from '@reduxjs/toolkit/query/react';
+type BaseQueryArgs = string | FetchArgs;
+const baseQueryWithLog: BaseQueryFn<
+  BaseQueryArgs,
+  unknown,
+  FetchBaseQueryError,
+  object,
+  FetchBaseQueryMeta
+> = async (args, api, extraOptions) => {
+  const argsObj = typeof args === 'string' ? { url: args, method: 'GET' } : args;
   Sentry.addBreadcrumb({
     category: 'rtk-query',
-    message: `➡️ ${args?.method || 'GET'} ${args?.url || args}`,
+    message: `➡️ ${argsObj.method ?? 'GET'} ${argsObj.url}`,
     level: 'info',
     data: { args },
   });
@@ -37,11 +51,11 @@ const baseQueryWithLog = async (args, api, extraOptions) => {
   if (result.error) {
     Sentry.addBreadcrumb({
       category: 'rtk-query',
-      message: `❌ ${args?.url || args} failed`,
+      message: `❌ ${argsObj.url} failed`,
       level: 'error',
       data: { error: result.error },
     });
-    Sentry.captureException(new Error(`RTK Query Error: ${args?.url || args}`), {
+    Sentry.captureException(new Error(`RTK Query Error: ${argsObj.url}`), {
       extra: { error: result.error, args },
     });
   }

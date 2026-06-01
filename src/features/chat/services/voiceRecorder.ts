@@ -88,13 +88,14 @@ class VoiceRecorder {
       this.startTimer();
 
       console.log('Voice recording started', { mimeType });
-    } catch (error: any) {
-      console.error('Failed to start recording:', error);
+    } catch (error: unknown) {
+      const e = error as Error;
+      console.error('Failed to start recording:', e);
       this.updateState({
         isRecording: false,
         isPaused: false,
         duration: 0,
-        error: error.message || 'Microphone access denied',
+        error: e.message || 'Microphone access denied',
       });
       throw error;
     }
@@ -130,7 +131,7 @@ class VoiceRecorder {
           });
 
           resolve({ blob, duration, url });
-        } catch (error: any) {
+        } catch (error: unknown) {
           reject(error);
         }
       };

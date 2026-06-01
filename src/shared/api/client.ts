@@ -1,109 +1,45 @@
-import axios, {
-  AxiosError,
-  AxiosRequestConfig,
-  InternalAxiosRequestConfig,
-  AxiosResponse,
-} from 'axios';
-import * as Sentry from '@sentry/react';
+// ─────────────────────────────────────────────────────────────────────────────
+// shared/api/client.ts — Axios instance with cookie-based auth.
+// All requests go to VITE_API_BASE_URL; cookies are sent automatically.
+// ─────────────────────────────────────────────────────────────────────────────
+import axios, { type AxiosRequestConfig, type AxiosResponse, type AxiosError } from 'axios';
 import { API_BASE_URL } from '@/config';
 
 export const apiClient = axios.create({
-  baseURL: `${API_BASE_URL}`,
+  baseURL: API_BASE_URL,
   timeout: 30000,
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  withCredentials: true, // sends HttpOnly cookie on every request
+  headers: { 'Content-Type': 'application/json' },
 });
 
-apiClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    Sentry.addBreadcrumb({
-      category: 'http',
-      message: `➡️ ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`,
-      level: 'info',
-      data: {
-        withCredentials: config.withCredentials,
-        headers: config.headers,
-        baseURL: config.baseURL,
-      },
-    });
-    return config;
-  },
-  (error) => {
-    Sentry.captureException(error);
-    return Promise.reject(error);
-  }
-);
+// ── Response interceptor ──────────────────────────────────────────────────────
 
 apiClient.interceptors.response.use(
-  (response: AxiosResponse) => {
-    Sentry.addBreadcrumb({
-      category: 'http',
-      message: `⬅️ ${response.status} ${response.config.url}`,
-      level: 'info',
-      data: {
-        status: response.status,
-        headers: response.headers,
-      },
-    });
-    return response;
-  },
+  (response: AxiosResponse) => response,
   (error: AxiosError) => {
-    if (error.response) {
-      const status = error.response.status;
-
-      Sentry.addBreadcrumb({
-        category: 'http',
-        message: `❌ ${status} ${error.config?.url}`,
-        level: 'error',
-        data: {
-          status,
-          url: error.config?.url,
-          baseURL: error.config?.baseURL,
-          withCredentials: error.config?.withCredentials,
-          responseHeaders: error.response.headers,
-          data: error.response.data,
-        },
-      });
-
-      if (status === 401 && window.location.pathname !== '/login') {
-        window.location.href = '/login';
-      }
-      if (status === 403) {
-        Sentry.captureException(error, { extra: { data: error.response.data } });
-      }
-      if (status >= 500) {
-        Sentry.captureException(error, { extra: { data: error.response.data } });
-      }
-    } else if (error.request) {
-      Sentry.captureException(error, {
-        extra: {
-          message: error.message,
-          url: error.config?.url,
-          baseURL: error.config?.baseURL,
-          withCredentials: error.config?.withCredentials,
-        },
-      });
+    if (error.response?.status === 401 && window.location.pathname !== '/login') {
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
 );
 
+// ── Thin typed wrappers ───────────────────────────────────────────────────────
+
 export const api = {
-  get: <T = any>(url: string, config?: AxiosRequestConfig) =>
+  get: <T = unknown>(url: string, config?: AxiosRequestConfig) =>
     apiClient.get<T>(url, config).then((res) => res.data),
 
-  post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) =>
+  post: <T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
     apiClient.post<T>(url, data, config).then((res) => res.data),
 
-  put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) =>
+  put: <T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
     apiClient.put<T>(url, data, config).then((res) => res.data),
 
-  patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) =>
+  patch: <T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
     apiClient.patch<T>(url, data, config).then((res) => res.data),
 
-  delete: <T = any>(url: string, config?: AxiosRequestConfig) =>
+  delete: <T = unknown>(url: string, config?: AxiosRequestConfig) =>
     apiClient.delete<T>(url, config).then((res) => res.data),
 };
 

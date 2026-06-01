@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useChat } from '@/features/chat/useChat';
 import { validateFile } from '@/features/chat/services/messageService';
 import { useDraft } from '@/shared/hooks/useDraft';
@@ -92,30 +92,33 @@ export function MessageInput({ editingMessage, onCancelEdit, onSaveEdit }: Messa
     };
   }, []);
 
-  const handleFileSelect = (files: FileList, _type: 'image' | 'video' | 'audio' | 'file') => {
-    const fileArray = Array.from(files);
-    const validFiles: SelectedFile[] = [];
+  const handleFileSelect = useCallback(
+    (files: FileList, _type: 'image' | 'video' | 'audio' | 'file') => {
+      const fileArray = Array.from(files);
+      const validFiles: SelectedFile[] = [];
 
-    for (const file of fileArray) {
-      const validation = validateFile(file);
-      if (!validation.valid) {
-        toast.error(translate(validation.error || 'error.generic'));
-        continue;
+      for (const file of fileArray) {
+        const validation = validateFile(file);
+        if (!validation.valid) {
+          toast.error(translate(validation.error || 'error.generic'));
+          continue;
+        }
+
+        const selectedFile: SelectedFile = { file };
+
+        if (file.type.startsWith('image/')) {
+          selectedFile.preview = URL.createObjectURL(file);
+        }
+
+        validFiles.push(selectedFile);
       }
 
-      const selectedFile: SelectedFile = { file };
+      setSelectedFiles((prev) => [...prev, ...validFiles]);
+    },
+    [translate]
+  );
 
-      if (file.type.startsWith('image/')) {
-        selectedFile.preview = URL.createObjectURL(file);
-      }
-
-      validFiles.push(selectedFile);
-    }
-
-    setSelectedFiles((prev) => [...prev, ...validFiles]);
-  };
-
-  const removeFile = (index: number) => {
+  const removeFile = useCallback((index: number) => {
     setSelectedFiles((prev) => {
       const newFiles = [...prev];
       const removed = newFiles.splice(index, 1)[0];
@@ -124,7 +127,7 @@ export function MessageInput({ editingMessage, onCancelEdit, onSaveEdit }: Messa
       }
       return newFiles;
     });
-  };
+  }, []);
 
   const handleEmojiSelect = (emoji: string) => {
     const textarea = textareaRef.current;

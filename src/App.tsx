@@ -1,16 +1,18 @@
 import { lazy, Suspense, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Provider } from 'react-redux';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { store } from './store';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { initAuth, selectUser, selectIsInitialized } from '@/features/auth/authSlice';
 import { SettingsProvider } from '@/features/settings/components/SettingsProvider';
 import { socketClient } from '@/features/chat/services/socketClient';
-import webrtcService from '@/features/chat/services/webrtcService';
-import { ErrorBoundary } from './components/ErrorBoundary';
+import { GOOGLE_CLIENT_ID } from '@/config';
 
 const Index = lazy(() => import('./pages/Index'));
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage'));
@@ -41,7 +43,9 @@ function AuthInit() {
   useEffect(() => {
     if (user) {
       socketClient.connect();
-      webrtcService.setupWebRTCListeners();
+      void import('@/features/chat/services/webrtcService').then((m) => {
+        m.default.setupWebRTCListeners();
+      });
     } else {
       socketClient.disconnect();
     }
@@ -114,18 +118,26 @@ function AppRoutes() {
   );
 }
 
+// GoogleOAuthProvider requires a non-empty clientId — falls back to a no-op wrapper
+function MaybeGoogleProvider({ children }: { children: React.ReactNode }) {
+  if (!GOOGLE_CLIENT_ID) return <>{children}</>;
+  return <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>{children}</GoogleOAuthProvider>;
+}
+
 const App = () => (
   <Provider store={store}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <ErrorBoundary>
-          <AppRoutes />
-          <SettingsProvider />
-        </ErrorBoundary>
-      </BrowserRouter>
-    </TooltipProvider>
+    <MaybeGoogleProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <ErrorBoundary>
+            <SettingsProvider />
+            <AppRoutes />
+          </ErrorBoundary>
+        </BrowserRouter>
+      </TooltipProvider>
+    </MaybeGoogleProvider>
   </Provider>
 );
 

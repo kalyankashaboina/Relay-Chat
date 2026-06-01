@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MessageSquare, Mail, Lock, User, Loader2, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
+import { GoogleLoginButton } from '@/features/auth/components/GoogleLoginButton';
 import { useRegisterMutation } from '@/features/api/apiSlice';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { setUser } from '@/features/auth/authSlice';
@@ -41,8 +42,9 @@ export default function RegisterPage() {
       dispatch(setUser(result.data));
       toast.success('Account created successfully!');
       navigate('/');
-    } catch (error: any) {
-      const message = error?.data?.message || t('error.generic', language);
+    } catch (error: unknown) {
+      const e = error as { data?: { message?: string } };
+      const message = e?.data?.message || t('error.generic', language);
       toast.error(message);
     }
   };
